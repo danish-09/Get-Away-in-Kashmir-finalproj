@@ -1,22 +1,14 @@
 import express from "express"
 import dotenv from "dotenv"
-// 
-import { clerkMiddleware, getAuth, requireAuth, clerkClient} from '@clerk/express'
-
+import { clerkMiddleware } from '@clerk/express'
 import cors from "cors"
 import path from "path"
 import { fileURLToPath } from "url"
-//
-import pg from "pg"
-import multer from "multer"
 
 import routes from "./routes/routes.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-
-
 
 dotenv.config()
 
@@ -44,8 +36,31 @@ app.use(express.urlencoded({extended: true}));
 // for dealing with json data 
 app.use(express.json());
 
+// Serve images statically from /uploads
+app.use('/uploads', express.static(path.join(__dirname, 'temp/uploads')));
+
+// default
+app.get("/", (req, res)=>{
+    res.send("hello");
+    console.log(process.env.CLERK_JWT_PUBLIC_KEY);
+})
+
 // routing
 app.use("/api",routes);
+
+
+
+app.listen(port,()=>{
+    console.log(`Started listening on http://localhost:${port}`);
+})
+
+
+
+
+
+
+
+
 
 
 // multipart form data is dealt by using multer
@@ -53,25 +68,22 @@ app.use("/api",routes);
 
 
 
-// CUSTOM MIDDLEWARE FOR AGE VALIDATION
 
 
 
-// middleware for Add post details validation
 
 
 
-// middleware to deal with unauthenticated requests
+
+
+
 
 
 
 // The clerkMiddleware() function checks the request's cookies and headers for a session JWT and,
 //  if found, attaches the Auth object to the request object under the auth key. using req.auth
 
-app.get("/", (req, res)=>{
-    res.json({message:"hello"});
-    console.log(process.env.CLERK_JWT_PUBLIC_KEY);
-})
+
 
 // {signInUrl: process.env.CLERK_SIGN_IN_URL}
 // const user_Id=req.auth.userId;
@@ -205,6 +217,3 @@ app.get("/", (req, res)=>{
 // });
 
 
-app.listen(port,()=>{
-    console.log(`Started listening on http://localhost:${port}`);
-})

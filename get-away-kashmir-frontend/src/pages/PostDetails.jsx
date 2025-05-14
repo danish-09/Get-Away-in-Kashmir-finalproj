@@ -3,13 +3,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 import Avatar from "../components/Avatar";
+import { useAuth } from "@clerk/clerk-react";
 
 // PostDetails component - Displays visitors of a specific post with friend management
 const PostDetails = () => {
+
+  const { isLoaded, getToken } = useAuth();
+
   const navigate = useNavigate(); // Navigation utility
   const { id } = useParams(); // Extract post ID from URL parameters
   const [visitors, setVisitors] = useState([]); // Store list of post visitors
   const [loading, setLoading] = useState(true); // Track loading state
+
+  console.log("POST ID IS",id);
 
   // Effect hook to fetch visitors data when component mounts
   useEffect(() => {
@@ -17,11 +23,16 @@ const PostDetails = () => {
       try {
         //API CALL HERE
         // Simulated API call to get post visitors
-        // const response = await fetch(`/api/posts/${id}/visitors`, {
-        //   headers: {
-        //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-        //   }
-        // });
+        const token = await getToken();
+        const response = await fetch(`http://localhost:3000/api/post-details/${id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const user_details_response = response.json();
+        console.log("USER DETAIL RESPONSE",user_details_response);
+        
         // const data = await response.json();
         // setVisitors(data.visitors);
 
@@ -59,26 +70,26 @@ const PostDetails = () => {
   }, [id]);
 
   // Handler for sending friend requests
-  const handleAddFriend = async (visitorId, name) => {
-    try {
-      //API CALL HERE
-      // Simulated API call to send friend request
-      // await fetch(`/api/friends/request`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   },
-      //   body: JSON.stringify({ visitorId })
-      // });
+  // const handleAddFriend = async (visitorId, name) => {
+  //   try {
+  //     //API CALL HERE
+  //     // Simulated API call to send friend request
+  //     // await fetch(`/api/friends/request`, {
+  //     //   method: 'POST',
+  //     //   headers: {
+  //     //     'Content-Type': 'application/json',
+  //     //     'Authorization': `Bearer ${localStorage.getItem('token')}`
+  //     //   },
+  //     //   body: JSON.stringify({ visitorId })
+  //     // });
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      alert(`Sent friend request to ${name}`);
-    } catch (error) {
-      console.error("Error sending friend request:", error);
-      alert("Failed to send friend request. Please try again.");
-    }
-  };
+  //     await new Promise((resolve) => setTimeout(resolve, 500));
+  //     alert(`Sent friend request to ${name}`);
+  //   } catch (error) {
+  //     console.error("Error sending friend request:", error);
+  //     alert("Failed to send friend request. Please try again.");
+  //   }
+  // };
 
   // Loading spinner display while fetching data
   if (loading) {

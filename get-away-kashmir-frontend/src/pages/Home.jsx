@@ -3,9 +3,13 @@ import React, { useState, useEffect } from "react";
 import Avatar from "../components/Avatar";
 import { useNavigate } from "react-router-dom";
 import { ArrowRightCircle } from "lucide-react"; // Icon component for the visit button
+import { useAuth } from "@clerk/clerk-react";
+
 
 // Home component to display all available trips
 const Home = () => {
+
+  const { isLoaded, getToken } = useAuth();
 
   // State to store all posts/trips // its an array for a reason  
   const [posts, setPosts] = useState([]);
@@ -15,81 +19,100 @@ const Home = () => {
   // Effect hook to fetch posts when component mounts yep yep yep
   useEffect(() => {
     const fetchPosts = async () => {
+      const token = await getToken();
       // In a real application, this would be an API call to your backend
       // Example API endpoint: GET /api/posts
-      // const response = await fetch('http://your-api/posts', {
-      //   method: 'GET',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   }
-      // });
-      // const data = await response.json();
+      const posts_response = await fetch('http://localhost:3000/api/get-post', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const resp = await posts_response.json()
+      const data = resp.posts;
+      console.log("backend se posts in home",resp.posts);
+
+      // if error
+      // if(posts_response.error)
+      // {
+      //   console.log("error from backend",posts_response.error);
+      //   alert(`${posts_response.error}`);
+      //   return;
+      // }
+
+      // const data = await posts_response.json();
+      // console.log("response from backend FOR POSTS IN HOME:",data);
 
       //dummy data simulating API response
-      const data = [
-        // Dummy post 1
-        {
-          id: 1,
-          title: "Trip to Gulmarg",
-          description:
-            "Join me on a snow adventure this December. Let's make memories!",
-          name: "Danish Najeeb",
-          // image: "https://randomuser.me/api/portraits/men/32.jpg",
-          personality: "ISTJ",
-          photos: [
-            "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-            "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-          ],
-          location: "Gulmarg, Kashmir",
-          date: "December 15 2025",
-        },
-        // Dummy post 2
-        {
-          id: 2,
-          title: "Exploring Pahalgam",
-          description: "Looking for a group to explore Pahalgam in January.",
-          name: "Sheikh Mumin Ahmad",
-          // image: "https://randomuser.me/api/portraits/women/44.jpg",
-          personality: "ISFP",
-          photos: [
-            "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-            "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-          ],
-          location: "Pahalgam, Kashmir",
-          date: "January 10 2025",
-        },
-        // Dummy post 3
-        {
-          id: 3,
-          title: "Srinagar Flower Festival",
-          description: "Join me for the famous Flower Festival in April.",
-          name: "Mohammad Ayman",
-          // image: "https://randomuser.me/api/portraits/men/76.jpg",
-          personality: "ISTP",
-          photos: [
-            "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-            "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-          ],
-          location: "Srinagar, Kashmir",
-          date: "April 5 2025",
-        },
-        // Dummy post 4
-        {
-          id: 4,
-          title: "Lets go to thajwas",
-          description: "Join me , let's explore Thajwas in Sonamarg",
-          name: "Imran Shah",
-          // image: "https://randomuser.me/api/portraits/men/76.jpg",
-          personality: "INTJ",
-          photos: [
-            "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-            "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-          ],
-          location: "Sonamarg, Kashmir",
-          date: "May 5 2025",
-        },
-      ];
+
+
+      // const data = [
+      //   // Dummy post 1
+      //   {
+      //     id: 1,
+      //     title: "Trip to Gulmarg",
+      //     description:
+      //       "Join me on a snow adventure this December. Let's make memories!",
+      //     name: "Danish Najeeb",
+      //     // image: "https://randomuser.me/api/portraits/men/32.jpg",
+      //     personality: "ISTJ",
+      //     photos: [
+      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
+      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
+      //     ],
+      //     location: "Gulmarg, Kashmir",
+      //     date: "December 15 2025",
+      //   },
+      //   // Dummy post 2
+      //   {
+      //     id: 2,
+      //     title: "Exploring Pahalgam",
+      //     description: "Looking for a group to explore Pahalgam in January.",
+      //     name: "Sheikh Mumin Ahmad",
+      //     // image: "https://randomuser.me/api/portraits/women/44.jpg",
+      //     personality: "ISFP",
+      //     photos: [
+      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
+      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
+      //     ],
+      //     location: "Pahalgam, Kashmir",
+      //     date: "January 10 2025",
+      //   },
+      //   // Dummy post 3
+      //   {
+      //     id: 3,
+      //     title: "Srinagar Flower Festival",
+      //     description: "Join me for the famous Flower Festival in April.",
+      //     name: "Mohammad Ayman",
+      //     // image: "https://randomuser.me/api/portraits/men/76.jpg",
+      //     personality: "ISTP",
+      //     photos: [
+      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
+      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
+      //     ],
+      //     location: "Srinagar, Kashmir",
+      //     date: "April 5 2025",
+      //   },
+      //   // Dummy post 4
+      //   {
+      //     id: 4,
+      //     title: "Lets go to thajwas",
+      //     description: "Join me , let's explore Thajwas in Sonamarg",
+      //     name: "Imran Shah",
+      //     // image: "https://randomuser.me/api/portraits/men/76.jpg",
+      //     personality: "INTJ",
+      //     photos: [
+      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
+      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
+      //     ],
+      //     location: "Sonamarg, Kashmir",
+      //     date: "May 5 2025",
+      //   },
+      // ];
+
+
+
       //API CALL HERE
       // Commented out actual API implementation for future use
       // try {
@@ -139,10 +162,10 @@ const Home = () => {
           >
             {/* User info section with avatar */}
             <div className="flex items-center gap-4 mb-4">
-              <Avatar username={post.name} personality={post.personality} />
+              <Avatar username={post.username} personality={post.personality} />
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">
-                  {post.name}
+                  {post.username}
                 </h3>
                 <p className="text-sm text-gray-500">{post.personality}</p>
               </div>
@@ -155,14 +178,15 @@ const Home = () => {
 
             {/* Horizontal scrollable photo gallery */}
             <div className="flex overflow-x-auto gap-2 mb-3 scrollbar-thin scrollbar-thumb-amber-700 scrollbar-track-transparent">
-              {post.photos.map((photo, idx) => (
+              {post.images.map((photo, idx) => photo ? (
                 <img
                   key={idx}
-                  src={photo}
+                  src={`http://localhost:3000/uploads/${photo.split("\\").pop()}`}
                   alt={`photo-${idx}`}
                   className="w-full h-72 rounded-lg object-cover flex-shrink-0"
                 />
-              ))}
+              ) : null
+              )}
             </div>
 
             {/* Location and date information */}
@@ -170,7 +194,7 @@ const Home = () => {
               <strong>Location:</strong> {post.location}
             </p>
             <p className="text-sm text-gray-600 mb-3">
-              <strong>Date:</strong> {post.date}
+              <strong>Date:</strong> {post.visit_date.slice(0,10)}
             </p>
 
             {/* Trip description */}
@@ -179,7 +203,7 @@ const Home = () => {
             {/* Visit button with navigation */}
             <div className="w-full flex justify-center items-center mt-4">
               <button
-                onClick={() => navigate(`/postDetails/${post.id}`)}
+                onClick={() => navigate(`/postDetails/${post.post_id}`)}
                 className="bg-amber-600 text-white px-6 py-2 rounded-full hover:bg-amber-700 transition-shadow shadow-md flex items-center gap-2"
               >
                 Visit <ArrowRightCircle size={18} />
