@@ -126,6 +126,11 @@ const ForgotPassword = () => {
       return;
     }
 
+    if (newPassword.length < 8 || repeatPassword.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
+
     try {
       //API CALL HERE
       // Simulated API call to verify OTP and reset password

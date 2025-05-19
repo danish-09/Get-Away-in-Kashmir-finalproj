@@ -73,7 +73,12 @@ const AddPost = () => {
     else if(!isvalidDate(visitDate)) {
       newErrors.visitDate = "Select a valid date"
     }
+    
     if(!description.trim()) newErrors.description = "Description is required";
+
+    if (images.length > 3) {
+      newErrors.image = "You can only select maximum of 3 images"
+    }
 
     // set the errors
     setErrors(newErrors);
@@ -130,7 +135,7 @@ const AddPost = () => {
         else
         {
           alert(`${result.error}`);
-          console.log("error from backend add post :",result.error);
+          console.log("Backend says :",result.error);
         }
         
       //     setTitle("");
@@ -239,6 +244,7 @@ const AddPost = () => {
             onChange={handleImageChange}
             className="w-full border border-amber-300 rounded-lg px-4 py-2 text-gray-700 file:bg-amber-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer"
           />
+          {errors.image && <p className="text-sm text-red-500">{errors.image}</p>}
           {/* Image preview grid */}
           {images.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-4">

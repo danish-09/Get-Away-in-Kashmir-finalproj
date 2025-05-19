@@ -12,10 +12,11 @@ const PostDetails = () => {
 
   const navigate = useNavigate(); // Navigation utility
   const { id } = useParams(); // Extract post ID from URL parameters
-  const [visitors, setVisitors] = useState([]); // Store list of post visitors
+  const [visitors, setVisitors] = useState([]); // Store list of post visitors its array
   const [loading, setLoading] = useState(true); // Track loading state
 
   console.log("POST ID IS",id);
+  
 
   // Effect hook to fetch visitors data when component mounts
   useEffect(() => {
@@ -30,35 +31,44 @@ const PostDetails = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        const user_details_response = response.json();
-        console.log("USER DETAIL RESPONSE",user_details_response);
+
+        const user_details_response = await response.json();
+        console.log("USER DETAIL RESPONSE",user_details_response.data);
+        const visitor_data = user_details_response.data;
+
+        // alert user if his profile was added to list of visitors
+        console.log("PROF ADDED?",user_details_response.checked);
+        if(user_details_response.checked)
+        {
+          alert("Your profile was added and is now visible to other users.");
+        }
         
-        // const data = await response.json();
-        // setVisitors(data.visitors);
+        // set data
+        setVisitors(visitor_data);
 
         // Dummy data
-        const mockVisitors = [
-          {
-            id: 1,
-            name: "Aditi Sharma",
-            personality: "ISTJ",
-            isFriend: false,
-          },
-          {
-            id: 2,
-            name: "Rohan Das",
-            personality: "ISFP",
-            isFriend: true,
-          },
-          {
-            id: 3,
-            name: "Sneha Verma",
-            personality: "INFJ",
-            isFriend: false,
-          },
-        ];
+        // const mockVisitors = [
+        //   {
+        //     id: 1,
+        //     name: "Aditi Sharma",
+        //     personality: "ISTJ",
+        //     isFriend: false,
+        //   },
+        //   {
+        //     id: 2,
+        //     name: "Rohan Das",
+        //     personality: "ISFP",
+        //     isFriend: true,
+        //   },
+        //   {
+        //     id: 3,
+        //     name: "Sneha Verma",
+        //     personality: "INFJ",
+        //     isFriend: false,
+        //   },
+        // ];
 
-        setVisitors(mockVisitors);
+        // setVisitors(mockVisitors);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching visitors:", error);
@@ -135,32 +145,33 @@ const PostDetails = () => {
             {/* Visitor information with avatar */}
             <div className="flex items-center gap-6">
               <Avatar
-                username={visitor.name}
+                username={visitor.username}
                 personality={visitor.personality}
               />
               <div>
                 <p className="text-lg font-semibold text-gray-700">
-                  {visitor.name}
+                  {visitor.username}
                 </p>
                 <p className="text-sm text-gray-500">{visitor.personality}</p>
-                <p className="text-sm text-gray-500">
+                {/* <p className="text-sm text-gray-500">
                   {visitor.isFriend ? "Friend" : "Not a Friend"}
-                </p>
+                </p> */}
               </div>
             </div>
 
             {/* Action buttons */}
             <div className="flex gap-3">
-              {!visitor.isFriend && (
+              {/* {!visitor.isFriend && (
                 <button
                   onClick={() => handleAddFriend(visitor.name)}
                   className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition ease-in-out duration-300"
                 >
                   Add Friend
                 </button>
-              )}
+              )} */}
+              
               <button
-                onClick={() => handleChat(visitor.name)}
+                onClick={() => handleChat(visitor.username)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition ease-in-out duration-300"
               >
                 Chat
