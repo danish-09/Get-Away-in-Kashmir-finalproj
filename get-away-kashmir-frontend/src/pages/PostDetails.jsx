@@ -111,9 +111,9 @@ const PostDetails = () => {
   }
 
   // Handler for initiating chat with a visitor
-  const handleChat = (name) => {
-    alert(`Starting chat with ${name}`);
-    navigate("/chat");
+  const handleChat = (id) => {
+    // alert(`Starting chat with ${name}`);
+    navigate("/chat", {state: {visitorId: id}});
   };
 
   // UI Structure:
@@ -171,7 +171,7 @@ const PostDetails = () => {
               )} */}
               
               <button
-                onClick={() => handleChat(visitor.username)}
+                onClick={() => handleChat(visitor.id)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition ease-in-out duration-300"
               >
                 Chat

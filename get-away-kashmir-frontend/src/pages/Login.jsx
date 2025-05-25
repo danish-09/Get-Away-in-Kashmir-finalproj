@@ -11,7 +11,7 @@ const Login = () => {
   // clerk
   const { isLoaded, signIn, setActive } = useSignIn();
 
-  const { isLoaded: isAuthLoaded, isSignedIn, userId, sessionId, getToken } = useAuth()
+  const { isLoaded: isAuthLoaded, isSignedIn, userId, sessionId, getToken,signOut } = useAuth()
   
 
   // Hook for programmatic navigation
@@ -48,12 +48,20 @@ const Login = () => {
 
     try {
 
+      if(isSignedIn)
+      {
+        alert("Already signed in, signing out");
+        signOut({redirectUrl:"/"})
+        return;
+      }
+      
       // api call to clerk
       const response = await signIn.create({
         identifier,
         password,
       });
 
+      
       if(response.status==="complete" && isLoaded)
       {
         await setActive({ session: response.createdSessionId });
@@ -68,7 +76,7 @@ const Login = () => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}` // jwt session token
           },
-          // for backend coverts to json(object notation) from js object
+          // for backend coverts to json.stringify which json not js obejct (object notation) from js object
         });
         
         //RESULT FROM BACKEND
