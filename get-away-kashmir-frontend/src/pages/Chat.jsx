@@ -11,16 +11,19 @@ import { io } from "socket.io-client"
 import { useLocation } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 
+
 // Chat component - Main chat interface component
 const Chat = () => {
 
   // from clerk for logged in user's username
   const { user } = useUser();
   const current_username = user.username;
+
+  // useref to store persistently socket connection and use it elsewhere
+  const socketRef = useRef(null);
     
-  
 
-
+  // clerk
   const { isLoaded, getToken } = useAuth();
 
   // loading animation
@@ -184,35 +187,86 @@ const Chat = () => {
   // Creates new WebSocket connection and sets up event handlers          // UER CLICK ON CHAT 
   useEffect(() => {
 
-    // function to run for connection to socket
-    const websocketconnect = async() => {
-      if (selectedUserId) {
-        // socket connection made
-      const socket = io("http://localhost:3000");
-      
-      // emit request with acknowledgement for joining chat room successfully
-      try{
-        const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
-        
-        // executes only in case of error
-        if(room_response.status !=="ok")
+    // establish socket connection
+    // avoids new connection if connection exists
+    if(!socketRef.current)
+    {
+      socketRef.current = io("http://localhost:3000");
+    }
+
+    // if chat user clicked
+    if(selectedUserId)
+    {
+      const joinroom = async () => {
+        try{
+          const room_response = await socketRef.current.timeout(500).emitWithAck('chat-room', selectedUserId)
+          
+          // executes only in case of error
+          if(room_response.status !=="ok")
           {
             console.log("Error on joining room");
             alert("Error occured on joining room!");
           }
+        }
+        catch(err)
+        {
+          console.error("Error occured during socket connection!");
+          alert("Error occured on joining room!");
+        }
       }
-      catch(err)
-      {
-        console.error("Error occured during socket connection!");
-        alert("Error occured on joining room!");
-      }
+
+      // call function
+      joinroom();
+
+      // on receiving a message from the chat room i.e from chat partner
+      socketRef.current.on('received', (message) => {        
+        console.log("received from backend", message);
+        // this includes our own messages 
+        setMessages((prev) => [...prev, message])
+
+      })
+    }
+    
+    // return 
+    return () => {
+      if(socketRef.current){
+        socketRef.current.off("received");
       }
     }
+  }, [selectedUserId])
+    
 
-    // call function to establish socket connection
-    websocketconnect()
-  },
-  [selectedUserId])
+    
+
+    // function to run for connection to socket
+  //   const websocketconnect = async() => {
+  //     if (selectedUserId) {
+  //       // socket connection made
+  //     const socket = io("http://localhost:3000");
+      
+  //     // emit request with acknowledgement for joining chat room successfully
+  //     try{
+  //       const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
+        
+        
+  //       if(room_response.status !=="ok")
+  //         {
+  //           console.log("Error on joining room");
+  //           alert("Error occured on joining room!");
+  //         }
+  //     }
+  //     catch(err)
+  //     {
+  //       console.error("Error occured during socket connection!");
+  //       alert("Error occured on joining room!");
+  //     }
+  //     }
+  //   }
+
+  //   // call function to establish socket connection
+  //   websocketconnect()
+  // },
+  // [selectedUserId])
 
     
 
@@ -295,7 +349,10 @@ const Chat = () => {
 
     try {
       // Immediately show user's message in UI
-      setMessages((prev) => [...prev, newMessage]);
+
+      // dont set message by yourself in ui let web socket do it
+      // setMessages((prev) => [...prev, newMessage]);
+
 
       // felt pointless
       // setUsers((prevUsers) =>
@@ -307,33 +364,30 @@ const Chat = () => {
       // );
 
       // web socket connection made
-      const socket = io("http://localhost:3000");
+      // const socket = io("http://localhost:3000");
       
       // emit request with acknowledgement for joining chat room
-      try{
-        const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
-        if(room_response.status !=="ok")
-          {
-            console.log("Error on joining room");
-            alert("Error occured on joining room!");
-          }
-      }
-      catch(err)
-      {
-        console.error("Error occured during socket connection!");
-        alert("Error occured on joining room!");
-      }
+      // try{
+      //   const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
+      //   if(room_response.status !=="ok")
+      //     {
+      //       console.log("Error on joining room");
+      //       alert("Error occured on joining room!");
+      //     }
+      // }
+      // catch(err)
+      // {
+      //   console.error("Error occured during socket connection!");
+      //   alert("Error occured on joining room!");
+      // }
       
       
 
       // after successfull joining of chatroom
-      socket.emit('chat-message', newMessage);
-
-      // on receiving a message from the chat room i.e from chat partner
-      socket.on('received',(mssg)=>{
-        console.log("received from backend",mssg);
-        setMessages((prev) => [...prev, mssg])
-      })
+      if(socketRef.current)
+      {
+        socketRef.current.emit('chat-message', newMessage);
+      }
       
       // api call to backend to store the message just made
       // send message to backend and send id of the chat user
@@ -349,6 +403,13 @@ const Chat = () => {
       // response after storing messsages
       const db_chat_insert = await chat_insert.json();
       console.log("response from db after inserting chats", db_chat_insert.message);
+
+      console.log("MRER LIEYEEEE",messages);
+
+      // resets the input field for new message
+      setInput("");
+
+
 
 
       // const socket = io("http://localhost:3000");
@@ -375,14 +436,13 @@ const Chat = () => {
       //   })
       // );
 
-      // resets the input field for new message
-      setInput("");
-
+      
 
       // call to db to store the new message in db
       //  sue this state selectedUserId // go to backend with this as params
 
       // 
+
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
@@ -398,7 +458,7 @@ const Chat = () => {
 
     try {
       const messages = await fetchChatsByFriendIdAPI(id);
-      // SETTING STATE for MESSAGES
+      // SETTING STATE for MESSAGES they are already existing they come from the db
       setMessages(messages); 
       console.log("MESSAGES that are set and canme from db",messages);
     } catch (error) {
