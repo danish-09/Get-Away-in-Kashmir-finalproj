@@ -112,6 +112,7 @@ export const chat_user_get = async (req, res)=>{
                 sender_username,
                 content,
             } = row;
+
             
             // check if userobject exists
             if (!userobject[chat_id]) {
@@ -123,11 +124,16 @@ export const chat_user_get = async (req, res)=>{
                 };
             }
         
-            // append messages to userobject
-            userobject[chat_id].messages.push({
+            console.log("CHA0", userobject[chat_id]);
+            
+            // append messages to userobject only if some chat exists in record
+            if(row.sender_username && row.content)
+            {
+                userobject[chat_id].messages.push({
                 sender: sender_username,
                 text: content,
             });
+            }
         }
         
         // console.log(userobject);
