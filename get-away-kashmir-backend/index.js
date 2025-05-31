@@ -4,15 +4,47 @@ import { clerkMiddleware } from '@clerk/express'
 import cors from "cors"
 import path from "path"
 import { fileURLToPath } from "url"
+// socket
+import { createServer } from 'node:http';
+import { Server } from "socket.io" 
 
 import routes from "./routes/routes.js"
+import handleSocketEvent from "./sockets/sockethandler.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 dotenv.config()
 
+// creates an Express application instance.
 const app = express();
+//socket
+// wraps the Express app inside a Node.js HTTP server.
+// this server will forward all requests to the app
+// HTTP server
+const server = createServer(app);
+
+// socket.io server 
+// server comes from websockets it knows how to accept websocket and fallback http connectionms
+// Manage real-time client communication
+//Emit and receive custom events
+
+// “Create a new WebSocket server (Socket.IO) and attach it to this existing HTTP server.”
+// This way:
+
+// You can share the same port for HTTP routes and real-time WebSocket communication.
+
+// Socket.IO listens for connection upgrades on the same server — no need to run two separate processes.
+
+// cross origin resource sharing
+// socket io server instance
+const io =  new Server(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET","POST"]
+    }
+})
+
 const port = 3000;
 
 // CORS TO RUN TWO SERVERS
@@ -45,12 +77,41 @@ app.get("/", (req, res)=>{
     console.log(process.env.CLERK_JWT_PUBLIC_KEY);
 })
 
+// socket io
+// 'connection' is a special event emitted by Socket.IO whenever a new client connects (i.e. a frontend socket calls io.connect() or io()).
+// Each connected client gets a socket object.
+// This socket:
+// Represents the individual connection.
+// Can emit or receive custom events.
+// Has an ID (socket.id), useful to identify the client.
+
+io.on('connection', (socket) => {
+    // pass scoket and io to function
+    handleSocketEvent(socket, io);
+
+    
+    // socket.on('chat-message', (message)=>{
+    //     console.log("message from user",message);
+    //     socket.emit('received',message);
+    // })
+
+
+    // socket.on('chat_message', (mssg) => {
+    //     console.log("received message",mssg);
+    //     socket.broadcast.emit('received',mssg);
+    // })
+
+    // socket.on('disconnect', () => {
+    //     console.log("user disconnected with id",socket.id);
+    // })
+})
+
 // routing
 app.use("/api",routes);
 
 
 
-app.listen(port,()=>{
+server.listen(port,()=>{
     console.log(`Started listening on http://localhost:${port}`);
 })
 
