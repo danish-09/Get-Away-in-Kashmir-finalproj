@@ -44,7 +44,12 @@ const Chat = () => {
 
   // from the post details page 
   const location = useLocation();
+
   const visitor_id = location.state?.visitorId;
+  const savedId = location.state?.savedId;
+
+  console.log("savedddd", savedId);
+  console.log("this is iddd", visitor_id);
 
   // coming from the home page after clicking on chat with a user
   // this useeffect will only run for this case 
@@ -54,6 +59,7 @@ const Chat = () => {
       if(visitor_id){
         try{
           //API CALL HERE
+          console.log("asdkj");
           //Simulated API call to insert selected visitor into chat users
           const token = await getToken();
           const response = await fetch(`http://localhost:3000/api/chat-user/${visitor_id}`, {
@@ -73,8 +79,30 @@ const Chat = () => {
   initial_chat();
 }, [visitor_id]);
 
-  
-  console.log("VISITOR KA ID FROM DETAILS",visitor_id);
+// useffect for api call if from saved profile page we got for chat
+useEffect(() => {
+    const initial_chat = async() => {
+      if(savedId){
+        try{
+          //API CALL HERE
+          //Simulated API call to insert selected visitor into chat users
+          const token2 = await getToken();
+          const response = await fetch(`http://localhost:3000/api/remembered-user/chat/${savedId}`, {
+          method: 'GET',
+          headers: {                    
+            'Authorization': `Bearer ${token2}`
+          }
+        });
+        // const initial_chat_response = await response.json();
+        // console.log("initial_chat_response",initial_chat_response.data);
+      }
+      catch(err)
+      {
+        console.error("error in chat db initial", err);
+      }
+  }}
+  initial_chat();
+}, [savedId]);
 
   // Mock API function to simulate fetching friends list                           3
   // Returns hardcoded user data with sample messages    
