@@ -48,9 +48,13 @@ export const chat_user_insert = async (req, res)=>{
         VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (normalized_pair) DO NOTHING RETURNING *; `, [current_username, current_personality , receiver_username, receiver_personality, user1, user2]);
     
-    console.log("inserted into db chat record",insert_result.rows[0]);
-    const chat_record_id = insert_result.rows[0].id;
-    console.log("chat record is",chat_record_id);
+    if(!insert_result.rowCount===0)
+    {
+        console.log("inserted into db chat record",insert_result.rows[0]);
+        const chat_record_id = insert_result.rows[0].id;
+        console.log("chat record is",chat_record_id);
+    }
+    
 
 
     
@@ -68,7 +72,7 @@ export const chat_user_insert = async (req, res)=>{
 }
 
 
-// GET CHAT USER
+// GET CHAT USERS
 export const chat_user_get = async (req, res)=>{
 
     try{
@@ -96,13 +100,14 @@ export const chat_user_get = async (req, res)=>{
             FROM chat_record cr
             LEFT JOIN chat_messages cm ON cr.id = cm.chat_id
             WHERE cr.sender_username = $1 OR cr.receiver_username = $1
-            ORDER BY cr.id, cm.id;`, [current_username])
+            ORDER BY cr.id DESC, cm.id;`, [current_username])
         
         // console.log("the result for the chat window of user", result.rows);
         const rows = result.rows;
+        console.log("this is from db after sort", rows);
 
-        // intialise userobject
-        const userobject = {};
+        // intialise userobject map function maintains insertion order
+        const usermap = new Map();
 
         for (const row of rows) {
             const {
@@ -115,37 +120,30 @@ export const chat_user_get = async (req, res)=>{
 
             
             // check if userobject exists
-            if (!userobject[chat_id]) {
-                userobject[chat_id] = {
+            if (!usermap.has(chat_id)) {
+                usermap.set(chat_id, {
                     id: chat_id,
                     name: chat_partner_username,
                     personality: chat_partner_personality,
                     messages: [],
+                })   
                 };
-            }
-        
-            console.log("CHA0", userobject[chat_id]);
-            
+
+
             // append messages to userobject only if some chat exists in record
             if(row.sender_username && row.content)
             {
-                userobject[chat_id].messages.push({
-                sender: sender_username,
-                text: content,
-            });
+                usermap.get(chat_id).messages.push({
+                    sender: sender_username,
+                    text: content,
+                })
             }
         }
-        
-        // console.log(userobject);
-        const finalChatList = Object.values(userobject); // this is what your frontend wants
-        // console.log(finalChatList);
+        const chatUserList = Array.from(usermap.values())
+        console.log("CHat users to be sent to backend", chatUserList);
 
         // everything goes well
-        return res.status(200).json({ message: "Chat users fetch successfull!", data: finalChatList });
-    }
-    else
-    {
-        return res.status(200).json({ message: "No existing chats found!" });
+        return res.status(200).json({ message: "Chat users fetch successfull!", data: chatUserList });
     }
 
     }
