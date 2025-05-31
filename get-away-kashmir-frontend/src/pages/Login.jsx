@@ -34,6 +34,7 @@ const Login = () => {
     // Validate if all required fields are filled
     if (!identifier || !password) {
       alert("Please enter all the details.");
+      setLoading(false);
       return;
     }
 
@@ -41,6 +42,7 @@ const Login = () => {
     const isEmail = identifier.includes("@");
     if (isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
       alert("Please enter a valid email address.");
+      setLoading(false);
       return;
     }
 
@@ -81,8 +83,16 @@ const Login = () => {
         
         //RESULT FROM BACKEND
         const backend_result = await result.json();
-        console.log("result from BACKEND during login: ",backend_result);
-
+        if(backend_result.error)
+        {
+          alert(backend_result.error);
+          console.log("Backend says error occured during login");
+        }
+        else
+        {
+          console.log("result from BACKEND during login: ",backend_result);
+        }
+        
         
         
         // goes to home screen
@@ -129,7 +139,7 @@ const Login = () => {
       // Handle any network or server errors
       setLoading(false);
       console.error("Login error:", err);
-      alert("Wrong details. Please try again.");
+      alert(err.message);
       
     }
   };
