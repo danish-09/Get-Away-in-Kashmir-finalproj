@@ -69,7 +69,7 @@ export const post_add = async (req, res)=>{
 
     // images
     const user_images = req.files.images;
-    if(user_images.length > 3)
+    if(user_images && user_images.length > 3)
     {
         return res.status(500).json({ error: "You can select a maximum of 3 images"});
     }
@@ -115,6 +115,7 @@ export const post_add = async (req, res)=>{
     
 }
 
+// get the posts
 
 export const post_get = async (req, res)=>{
     try{
@@ -144,8 +145,8 @@ export const post_get = async (req, res)=>{
       );
     
     const result = db_posts.rows;
-    console.log("result from the dattabase tables combined is", result);
-    console.log("no of rows",db_posts.rowCount);
+    // console.log("result from the dattabase tables combined is", result);
+    // console.log("no of rows",db_posts.rowCount);
 
     // everything goes well
     return res.status(200).json({ posts: result });
@@ -198,6 +199,7 @@ export const post_visit = async (req, res)=>{
         `INSERT INTO post_visits (username, personality, post_id, user_id)
         VALUES ($1, $2, $3, $4)`,
         [current_username, user_personality, current_post_id, current_User_Id]);
+        // tells user has been inserted into visitors list to frontend
         var check=true;
     }
 
