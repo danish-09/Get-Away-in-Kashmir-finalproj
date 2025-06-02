@@ -1,4 +1,8 @@
 import pg from "pg"
+import dotenv from "dotenv"
+
+dotenv.config()
+
 
 // setup database connection
 
