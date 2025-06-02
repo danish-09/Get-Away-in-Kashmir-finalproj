@@ -37,14 +37,14 @@ router.get("/chat-user", isAuthenticated, chat_user_get)
 router.post("/chat-data/insert", isAuthenticated, chat_data_insert)
 
 
-// INSERT REMEMBERED USERS
+// INSERT SAVED PROFILE
 router.get("/remember-user/:id", isAuthenticated, remember_user_insert)
 
 
-// GET REMEMBERED USERS
+// GET SAVED PROFILES
 router.get("/remembered-user", isAuthenticated, remembered_user_get)
 
-// REMEMBERED USERS DIRECT DHAT
+// SAVED PROFILES DIRECT DHAT
 router.get("/remembered-user/chat/:id", isAuthenticated, remembered_user_chat)
 
 
