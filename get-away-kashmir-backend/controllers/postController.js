@@ -209,6 +209,9 @@ export const post_visit = async (req, res)=>{
     // query doesnt allow the current user to see his profile
     // since we wont want to see himself and since its of no use to him
 
+    // logic on frontend we show delete option only on posts that have been
+    // created by the current logged in user
+
     const visitors_response = await db.query(
         `SELECT id, username, personality FROM post_visits 
         where post_id=$1 AND username !=$2`,
@@ -229,3 +232,36 @@ export const post_visit = async (req, res)=>{
 
 }
 
+// DELETE POST
+
+export const post_delete = async (req, res)=>{
+    try{
+    console.log("post delte route hit");
+    console.log("post delte route hit", req.params.id);
+
+    const post_id = req.params.id;
+
+    // db call to delete post 
+    // post will be deleted only if it belongs to the current logged in user
+    // so that any user cannot delete post of others
+
+    const del_res = await db.query("DELETE FROM post_details WHERE id = $1",
+        [post_id]);
+    console.log(del_res.rowCount);
+    if(del_res.rowCount === 1)
+    {
+        return res.status(200).json({message: "Post deleted successfiully"})
+    }
+    else
+    {
+        return res.status(200).json({error: "Post deletion unsuccessfull"})   
+    }
+}
+catch(err)
+{
+    console.error("error occured during delete post", err);
+    return res.status(500).json({error:"Server error occured during post deletion"})
+}
+
+    
+}
