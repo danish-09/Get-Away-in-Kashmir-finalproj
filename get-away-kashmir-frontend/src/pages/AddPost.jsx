@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react"
 
 // AddPost component - Handles creation of new trip posts with images and details
+
 const AddPost = () => {
-  // Authentication token retrieval is commented out for now
-  // const token = localStorage.getItem("token");
 
   // useAuth for jwt token
   const { isLoaded, getToken  } = useAuth();
@@ -15,16 +14,16 @@ const AddPost = () => {
   const [errors, setErrors] = useState({});
     
   // State management for form data
-  const [title, setTitle] = useState(""); // For trip title
-  const [imgfile, setImgFile] = useState([]); // For image upload for backend
-  const [images, setImages] = useState([]); // Array to store image preview URLs
-  const [location, setLocation] = useState(""); // For trip location
-  const [visitDate, setVisitDate] = useState(""); // For when the trip occurred
+  const [title, setTitle] = useState("");             // For trip title
+  const [imgfile, setImgFile] = useState([]);         // For image upload for backend
+  const [images, setImages] = useState([]);           // Array to store image preview URLs
+  const [location, setLocation] = useState("");       // For trip location
+  const [visitDate, setVisitDate] = useState("");     // For when the trip occurred
   const [description, setDescription] = useState(""); // For detailed trip description
   
-  const navigate = useNavigate(); // Hook for programmatic navigation
+  const navigate = useNavigate();          // Hook for programmatic navigation
 
-  // vali date validation logic
+  // date validation logic
   const isvalidDate = (inputDate) => {
     const selectedDate = new Date(inputDate);
     const today = new Date();
@@ -33,7 +32,7 @@ const AddPost = () => {
     selectedDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
   
-    // true if selected date bu user is today or afterwards
+    // true if selected date by user is today or afterwards
     // false if earlier date is selected
     return selectedDate >= today;
   };
@@ -42,6 +41,7 @@ const AddPost = () => {
   // Handles image file selection and preview generation
   // Creates object URLs for selected images to show previews
   const handleImageChange = (e) => {
+    
     // Array.from turns an array from any object with a length property.
     // new array instance
 
@@ -61,9 +61,6 @@ const AddPost = () => {
     e.preventDefault(); // Prevent default form submission
 
     const newErrors = {};  // js object storing errors
-    
-    // images can be not selected //
-    // WHAT IF GORE IMAGES SEE ON THAT?
 
     // validation
 
@@ -85,19 +82,7 @@ const AddPost = () => {
 
     if (Object.keys(newErrors).length === 0 && isLoaded) {
 
-      // const newPost = {
-      //   title,
-      //   imgfile,
-      //   location,
-      //   description,
-      //   visitDate,
-      //   // Add timestamp 
-      //   createdAt: new Date().toISOString(), // utc coordinated universal time
-        
-      // };      
-      // console.log("Post added:", newPost);
-
-      // formdata obj
+      // formdata object
       const formData = new FormData();
 
       formData.append("title", title);
@@ -125,28 +110,23 @@ const AddPost = () => {
         });
 
         const result = await response.json();
+
+        // success
         if (!result.error) 
         {
           console.log("Backend says post added sucessfully");
           alert("Post added successfully")
+          // navigates to home page
           navigate("/home");
           return;
         }
+
+        // on error
         else
         {
           alert(`${result.error}`);
           console.log("Backend says :",result.error);
         }
-        
-      //     setTitle("");
-      //     setImages([]);
-      //     setLocation("");
-      //     setDescription("");
-      //     setVisitDate("");
-      //    navigate("/home");
-      //   } 
-      //   else {
-      //   alert(result.message || "Invalid credentials");
 
       }
       catch(error)
@@ -155,48 +135,7 @@ const AddPost = () => {
       }
     }
 
-    // Create new post object with form data
     
-
-    //API CALL HERE
-
-    // API call commented out - would send post data to backend
-    // try {
-    //   const response = await fetch("/api/add-post", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //           "token":token,
-    //     },
-    //     body: JSON.stringify({ post: newPost }),
-    //   });
-
-    //   const result = await response.json();
-
-    //   if (result.success) {
-    //     setTitle("");
-    //     setImages([]);
-    //     setLocation("");
-    //     setDescription("");
-    //     setVisitDate("");
-    //     alert("Post added successfully!");
-    //     navigate("/home");
-    //   } else {
-    //     alert(result.message || "Invalid credentials");
-    //   }
-    // } catch (err) {
-    //   console.error("Login error:", err);
-    //   alert("Something went wrong. Please try again.");
-    // }
-
-    // Reset form fields after submission
-    // setTitle("");
-    // setImages([]);
-    // setLocation("");
-    // setDescription("");
-    // setVisitDate("");
-    // alert("Post added successfully!");
-    // navigate("/home"); // Redirect to home page
   };
 
   // UI Structure:
@@ -209,14 +148,15 @@ const AddPost = () => {
   //   5. Description textarea
   //   6. Submit button
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-md">
+    <div className="max-w-2xl mx-auto mt-6 px-8 py-6 bg-white rounded-lg shadow-md">
       {/* Form title with styling */}
       <h1 className="text-2xl font-bold mb-6 text-amber-700">
         Create a New Trip
       </h1>
 
+      <div className="">
       {/* Form with Tailwind styling for consistent spacing */}
-      <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-2" encType="multipart/form-data" noValidate>
         {/* Title input with label and styling */}
         <div>
           <label className="block text-amber-700 mb-2">Title</label>
@@ -245,6 +185,7 @@ const AddPost = () => {
             className="w-full border border-amber-300 rounded-lg px-4 py-2 text-gray-700 file:bg-amber-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer"
           />
           {errors.image && <p className="text-sm text-red-500">{errors.image}</p>}
+          
           {/* Image preview grid */}
           {images.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-4">
@@ -315,6 +256,7 @@ const AddPost = () => {
           Post
         </button>
       </form>
+      </div>
     </div>
   );
 };

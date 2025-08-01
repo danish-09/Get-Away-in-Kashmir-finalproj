@@ -5,25 +5,26 @@ import { HiArrowLeft } from "react-icons/hi";
 import Avatar from "../components/Avatar";
 import { useAuth } from "@clerk/clerk-react";
 
-// PostDetails component - Displays visitors of a specific post with friend management
+// PostDetails component - Displays visitors of a specific post
 const PostDetails = () => {
 
+  // from clerk
   const { isLoaded, getToken } = useAuth();
 
   const navigate = useNavigate(); // Navigation utility
+
   const { id } = useParams(); // Extract post ID from URL parameters
   const [visitors, setVisitors] = useState([]); // Store list of post visitors its array
   const [loading, setLoading] = useState(true); // Track loading state
 
   console.log("POST ID IS",id);
-  
 
   // Effect hook to fetch visitors data when component mounts
   useEffect(() => {
     const fetchVisitors = async () => {
       try {
-        //API CALL HERE
-        // Simulated API call to get post visitors
+
+        // API call to get post visitors
         const token = await getToken();
         const response = await fetch(`http://localhost:3000/api/post-details/${id}`, {
           method: 'GET',
@@ -37,7 +38,9 @@ const PostDetails = () => {
         const visitor_data = user_details_response.data;
 
         // alert user if his profile was added to list of visitors
-        console.log("PROF ADDED?",user_details_response.checked);
+        console.log("PROfile ADDED?",user_details_response.checked);
+
+        // if user profile has been added to list of visitors for the said post
         if(user_details_response.checked)
         {
           alert("Your profile was added and is now visible to other users.");
@@ -46,30 +49,9 @@ const PostDetails = () => {
         // set data
         setVisitors(visitor_data);
 
-        // Dummy data
-        // const mockVisitors = [
-        //   {
-        //     id: 1,
-        //     name: "Aditi Sharma",
-        //     personality: "ISTJ",
-        //     isFriend: false,
-        //   },
-        //   {
-        //     id: 2,
-        //     name: "Rohan Das",
-        //     personality: "ISFP",
-        //     isFriend: true,
-        //   },
-        //   {
-        //     id: 3,
-        //     name: "Sneha Verma",
-        //     personality: "INFJ",
-        //     isFriend: false,
-        //   },
-        // ];
-
-        // setVisitors(mockVisitors);
+        // animation stops
         setLoading(false);
+
       } catch (error) {
         console.error("Error fetching visitors:", error);
         setLoading(false);
@@ -79,27 +61,48 @@ const PostDetails = () => {
     fetchVisitors();
   }, [id]);
 
-  // Handler for sending friend requests
-  // const handleAddFriend = async (visitorId, name) => {
-  //   try {
-  //     //API CALL HERE
-  //     // Simulated API call to send friend request
-  //     // await fetch(`/api/friends/request`, {
-  //     //   method: 'POST',
-  //     //   headers: {
-  //     //     'Content-Type': 'application/json',
-  //     //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-  //     //   },
-  //     //   body: JSON.stringify({ visitorId })
-  //     // });
+  // Handler for saving profile of visitors
+  const handleAddFriend = async (visitorId) => {
+    try {
+      const visit_id = visitorId;
+      console.log("visit id of user", visit_id);
 
-  //     await new Promise((resolve) => setTimeout(resolve, 500));
-  //     alert(`Sent friend request to ${name}`);
-  //   } catch (error) {
-  //     console.error("Error sending friend request:", error);
-  //     alert("Failed to send friend request. Please try again.");
-  //   }
-  // };
+      const token2 = await getToken();
+
+      // api call to add user to remembered users list/ saved profiles
+      const res = await fetch(`http://localhost:3000/api/remember-user/${visit_id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token2}`
+        },
+      });
+      const db_result = await res.json();
+      // on error
+      if(db_result.error==="yes")
+      {
+        alert(db_result.message);
+        console.log(db_result.message);
+      }
+      // success
+      else
+      {
+        if(db_result.message)
+        {
+          alert(db_result.message);
+          console.log(db_result.message);
+        }
+        if(db_result.user_added_message)
+        {
+          alert(db_result.user_added_message);
+          console.log(db_result.user_added_message);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      alert("Failed to send friend request. Please try again.");
+    }
+  };
 
   // Loading spinner display while fetching data
   if (loading) {
@@ -112,7 +115,6 @@ const PostDetails = () => {
 
   // Handler for initiating chat with a visitor
   const handleChat = (id) => {
-    // alert(`Starting chat with ${name}`);
     navigate("/chat", {state: {visitorId: id}});
   };
 
@@ -136,7 +138,7 @@ const PostDetails = () => {
       </div>
 
       {/* Visitors list */}
-      <div className="space-y-6">
+      <div className="overflow-y-auto pb-4 space-y-6 h-[80vh] px-4 w-full">
         {visitors.map((visitor) => (
           <div
             key={visitor.id}
@@ -153,22 +155,20 @@ const PostDetails = () => {
                   {visitor.username}
                 </p>
                 <p className="text-sm text-gray-500">{visitor.personality}</p>
-                {/* <p className="text-sm text-gray-500">
-                  {visitor.isFriend ? "Friend" : "Not a Friend"}
-                </p> */}
+
               </div>
             </div>
 
             {/* Action buttons */}
             <div className="flex gap-3">
-              {/* {!visitor.isFriend && (
+              {!visitor.isFriend && (
                 <button
-                  onClick={() => handleAddFriend(visitor.name)}
+                  onClick={() => handleAddFriend(visitor.id)}
                   className="px-4 py-2 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition ease-in-out duration-300"
                 >
-                  Add Friend
+                  Save Profile
                 </button>
-              )} */}
+              )}
               
               <button
                 onClick={() => handleChat(visitor.id)}

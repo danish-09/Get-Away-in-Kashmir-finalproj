@@ -5,23 +5,42 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRightCircle } from "lucide-react"; // Icon component for the visit button
 import { useAuth } from "@clerk/clerk-react";
 
+import { useUser } from "@clerk/clerk-react";
+import { MdDelete } from "react-icons/md";
+import { useRef } from "react";
+
 
 // Home component to display all available trips
 const Home = () => {
 
+  const { user } = useUser();
+  const current_username = user.username;
+
+  const postContainerRef = useRef(null);
+
   const { isLoaded, getToken } = useAuth();
 
-  // State to store all posts/trips // its an array for a reason  
+  // State to store all posts/trips 
+  // its an array for a reason  
   const [posts, setPosts] = useState([]);
+
   // Hook for programmatic navigation
   const navigate = useNavigate();
 
-  // Effect hook to fetch posts when component mounts yep yep yep
+  // for ui position remember
+  const handleOnClick = (post_id) => {
+    const lastPosition = postContainerRef?.current.scrollTop;
+    sessionStorage.setItem('postlastposition', lastPosition);
+    navigate(`/postDetails/${post_id}`);
+
+  }
+
+  // Effect hook to fetch posts when component mounts 
   useEffect(() => {
     const fetchPosts = async () => {
       const token = await getToken();
-      // In a real application, this would be an API call to your backend
-      // Example API endpoint: GET /api/posts
+
+      // Api Call to backend for fetching the posts/ trips
       const posts_response = await fetch('http://localhost:3000/api/get-post', {
         method: 'GET',
         headers: {
@@ -31,111 +50,19 @@ const Home = () => {
       });
       const resp = await posts_response.json()
       const data = resp.posts;
+      
+      // logging trips from backend
       console.log("backend se posts in home",resp.posts);
 
-      // if error
-      // if(posts_response.error)
-      // {
-      //   console.log("error from backend",posts_response.error);
-      //   alert(`${posts_response.error}`);
-      //   return;
-      // }
+      // for ui
+      const lastPosition = sessionStorage.getItem('postlastposition');
+      if(postContainerRef?.current && lastPosition)
+      {
+        postContainerRef.current.scrollTop = parseInt(lastPosition, 10);
 
-      // const data = await posts_response.json();
-      // console.log("response from backend FOR POSTS IN HOME:",data);
-
-      //dummy data simulating API response
-
-
-      // const data = [
-      //   // Dummy post 1
-      //   {
-      //     id: 1,
-      //     title: "Trip to Gulmarg",
-      //     description:
-      //       "Join me on a snow adventure this December. Let's make memories!",
-      //     name: "Danish Najeeb",
-      //     // image: "https://randomuser.me/api/portraits/men/32.jpg",
-      //     personality: "ISTJ",
-      //     photos: [
-      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-      //     ],
-      //     location: "Gulmarg, Kashmir",
-      //     date: "December 15 2025",
-      //   },
-      //   // Dummy post 2
-      //   {
-      //     id: 2,
-      //     title: "Exploring Pahalgam",
-      //     description: "Looking for a group to explore Pahalgam in January.",
-      //     name: "Sheikh Mumin Ahmad",
-      //     // image: "https://randomuser.me/api/portraits/women/44.jpg",
-      //     personality: "ISFP",
-      //     photos: [
-      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-      //     ],
-      //     location: "Pahalgam, Kashmir",
-      //     date: "January 10 2025",
-      //   },
-      //   // Dummy post 3
-      //   {
-      //     id: 3,
-      //     title: "Srinagar Flower Festival",
-      //     description: "Join me for the famous Flower Festival in April.",
-      //     name: "Mohammad Ayman",
-      //     // image: "https://randomuser.me/api/portraits/men/76.jpg",
-      //     personality: "ISTP",
-      //     photos: [
-      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-      //     ],
-      //     location: "Srinagar, Kashmir",
-      //     date: "April 5 2025",
-      //   },
-      //   // Dummy post 4
-      //   {
-      //     id: 4,
-      //     title: "Lets go to thajwas",
-      //     description: "Join me , let's explore Thajwas in Sonamarg",
-      //     name: "Imran Shah",
-      //     // image: "https://randomuser.me/api/portraits/men/76.jpg",
-      //     personality: "INTJ",
-      //     photos: [
-      //       "https://images.pexels.com/photos/25786709/pexels-photo-25786709/free-photo-of-view-of-a-road-between-autumnal-trees.jpeg",
-      //       "https://images.pexels.com/photos/19147506/pexels-photo-19147506/free-photo-of-auto-rickshaw-on-road-in-autumn.jpeg",
-      //     ],
-      //     location: "Sonamarg, Kashmir",
-      //     date: "May 5 2025",
-      //   },
-      // ];
-
-
-
-      //API CALL HERE
-      // Commented out actual API implementation for future use
-      // try {
-      //   const response = await fetch("/api/trips");
-
-      //   const result = await response.json();
-
-      //   // result={
-      //   //   success:true,
-      //   //   data:data
-      //   // }
-
-      //   if (result.success) {
-      //     // setPosts(result.data);
-      //   } else {
-      //     alert("error getting posts");
-      //   }
-      // } catch (err) {
-      //   console.error("home error:", err);
-      //   alert("Something went wrong. Please try again.");
-      // }
-
-      // Update state with fetched/dummy data
+      }
+      
+      // setting state using trips from backend
       setPosts(data);
     };
 
@@ -143,33 +70,81 @@ const Home = () => {
     fetchPosts();
   }, []);
 
+
+  // handles deleting a trip , option only provided for trips posted by current logged in user
+
+  const handleDelete = async (delete_id) => {
+    const del_id = delete_id;
+    console.log("delet id of post", del_id);
+
+    const del_token = await getToken();
+    // db calling
+    const delete_post = await fetch(`http://localhost:3000/api/delete-post/${del_id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${del_token}` // jwt session token
+        },          
+      });
+
+    const del_response = await delete_post.json();
+
+    // on error
+    if(del_response.error)
+    {
+      console.log("backend says error deleting post", del_response.error)
+      alert(del_response.error)
+    }
+    // delete successfull
+    else
+    {
+      console.log("backend says", del_response.message);
+      alert(del_response.message);
+      setPosts((prevPosts) => prevPosts.filter(post => post.post_id !== delete_id));
+    }
+
+  }
+
   // Render the component
   return (
     // Main container with full height and background
-    <div className="min-h-screen bg-gray-200 px-4 py-6">
+    <div className="bg-gray-200 px-4 py-6">
       {/* Page title */}
       <h1 className="text-3xl text-center font-bold text-amber-700 mb-8">
         Available Trips
       </h1>
 
       {/* Scrollable container for posts */}
-      <div className="flex flex-col gap-6 items-center overflow-y-auto max-h-[calc(100vh-150px)] px-2">
+      <div ref={postContainerRef} className="flex flex-col gap-6 items-center overflow-y-auto h-[80vh] px-2">
         {/* Map through posts and render each post card */}
         {posts.map((post) => (
           <div
-            key={post.id}
+            key={post.post_id}
             className="w-full max-w-2xl bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-200"
           >
             {/* User info section with avatar */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex w-full justify-between items-center gap-4 mb-4">
+              <div className="flex flex-row justify-center items-center">
               <Avatar username={post.username} personality={post.personality} />
+              
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">
                   {post.username}
                 </h3>
                 <p className="text-sm text-gray-500">{post.personality}</p>
               </div>
+              </div>
+              
+              <button 
+            onClick={() => handleDelete(post.post_id)}
+            className="text-red-600 hover:text-red-800 text-2xl font-medium"
+            >
+              {
+                current_username === post.username && <MdDelete />
+              }
+              
+            </button>
             </div>
+            
 
             {/* Post title */}
             <h2 className="text-xl font-bold text-gray-800 mb-2">
@@ -203,7 +178,7 @@ const Home = () => {
             {/* Visit button with navigation */}
             <div className="w-full flex justify-center items-center mt-4">
               <button
-                onClick={() => navigate(`/postDetails/${post.post_id}`)}
+                onClick = {()=>handleOnClick(post.post_id)} 
                 className="bg-amber-600 text-white px-6 py-2 rounded-full hover:bg-amber-700 transition-shadow shadow-md flex items-center gap-2"
               >
                 Visit <ArrowRightCircle size={18} />

@@ -21,7 +21,8 @@ const Chat = () => {
 
   // useref to store persistently socket connection and use it elsewhere
   const socketRef = useRef(null);
-    
+  
+  const chatscroll = useRef(null);
 
   // clerk
   const { isLoaded, getToken } = useAuth();
@@ -38,18 +39,17 @@ const Chat = () => {
   const [input, setInput] = useState("");
   // State for storing chat messages with selected user
   const [messages, setMessages] = useState([]); // THIS IS SET ON CHAT RETRIEVAL FROM DB
-  //// Ref to store WebSocket instance
-  // const socketRef = useRef(null);
   
 
   // from the post details page 
   const location = useLocation();
 
+  // if visitor id (from saved profiles)
   const visitor_id = location.state?.visitorId;
   const savedId = location.state?.savedId;
 
-  console.log("savedddd", savedId);
-  console.log("this is iddd", visitor_id);
+  console.log("saved", savedId);
+  console.log("this is id", visitor_id);
 
   // coming from the home page after clicking on chat with a user
   // this useeffect will only run for this case 
@@ -58,9 +58,8 @@ const Chat = () => {
     const initial_chat = async() => {
       if(visitor_id){
         try{
-          //API CALL HERE
-          console.log("asdkj");
-          //Simulated API call to insert selected visitor into chat users
+
+          // API call to insert selected visitor into chat users
           const token = await getToken();
           const response = await fetch(`http://localhost:3000/api/chat-user/${visitor_id}`, {
           method: 'GET',
@@ -68,8 +67,7 @@ const Chat = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        // const initial_chat_response = await response.json();
-        // console.log("initial_chat_response",initial_chat_response.data);
+
       }
       catch(err)
       {
@@ -79,13 +77,14 @@ const Chat = () => {
   initial_chat();
 }, [visitor_id]);
 
-// useffect for api call if from saved profile page we got for chat
+// useffect for api call if from saved profile page we initiate chat
 useEffect(() => {
+
     const initial_chat = async() => {
       if(savedId){
         try{
-          //API CALL HERE
-          //Simulated API call to insert selected visitor into chat users
+
+          // API call to insert selected visitor into chat users
           const token2 = await getToken();
           const response = await fetch(`http://localhost:3000/api/remembered-user/chat/${savedId}`, {
           method: 'GET',
@@ -93,8 +92,6 @@ useEffect(() => {
             'Authorization': `Bearer ${token2}`
           }
         });
-        // const initial_chat_response = await response.json();
-        // console.log("initial_chat_response",initial_chat_response.data);
       }
       catch(err)
       {
@@ -104,11 +101,7 @@ useEffect(() => {
   initial_chat();
 }, [savedId]);
 
-  // Mock API function to simulate fetching friends list                           3
-  // Returns hardcoded user data with sample messages    
-
-
-  // function to GET CHATS FROM BACKEnd database
+  // function to get chats from backend database
   const fetchFriendsAPI = async () => { 
 
     // show loading
@@ -124,63 +117,32 @@ useEffect(() => {
         });
     
     const db_users_response = await response.json();
-    console.log("message from backend on fetching chat users",db_users_response.message);
+
     //loading animation stops
     setLoading(false)
     
+    // no chats
+    if(!db_users_response.data)
+    {
+      console.log("failed to fetching chat users",db_users_response.message);
+    }
+    // chats exist
+    else
+    {
+      console.log("success fetching chat users",db_users_response.message);
+    }
+    
+    // chat users received from backend
     const chat_users = db_users_response.data;
     console.log("chat users ::::::", chat_users);
     return chat_users;
-    
-    
-    
-    
 
-    // Dummy return
-    // return [
-    //   {
-    //     id: 1,
-    //     name: "Danish Najeeb",
-    //     personality: "ISTJ",
-    //     messages: [
-    //       { sender: "other", text: "Hey! Are you going to Gulmarg too?" },
-    //       { sender: "me", text: "Yes! Planning to leave next week." },
-    //     ],
-    //   },
-    //   {
-    //     id: 2,
-    //     name: "Sheikh Mumin Ahmad",
-    //     personality: "ISFP",
-    //     messages: [
-    //       { sender: "other", text: "Are we still on for Pahalgam trip?" },
-    //       { sender: "me", text: "Absolutely, can’t wait!" },
-    //     ],
-    //   },
-    //   {
-    //     id: 3,
-    //     name: "Mohammad Ayman",
-    //     personality: "ISTP",
-    //     messages: [
-    //       {
-    //         sender: "other",
-    //         text: "Want to check out the Flower Festival?",
-    //       },
-    //       { sender: "me", text: "Yes, let’s make it happen." },
-    //     ],
-    //   },
-    // ];
   };
 
   //  function to fetch chat history for a specific user
 
   const fetchChatsByFriendIdAPI = async (friendId) => {
     
-    // API CALL HERE                                                    
-    // const response = await fetch(`/api/chats/${friendId}`);
-    // return await response.json();
-
-    // Dummy logic to return messages
-    // CHAT USERS FROM BACKEND
     // calls function to get chat_users
     const users = await fetchFriendsAPI();
     // finds selected user
@@ -198,7 +160,7 @@ useEffect(() => {
         // calls function
         const backend_Users = await fetchFriendsAPI();
 
-        // set users onli if chat users exist 
+        // set users only if chat users exist 
         if(backend_Users){
           setUsers(backend_Users);
         }
@@ -212,7 +174,7 @@ useEffect(() => {
   }, []);
 
   // Effect hook to establish WebSocket connection when a user is selected
-  // Creates new WebSocket connection and sets up event handlers          // UER CLICK ON CHAT 
+  // Creates new WebSocket connection and sets up event handlers          // USER CLICK ON CHAT 
   useEffect(() => {
 
     // establish socket connection
@@ -264,106 +226,6 @@ useEffect(() => {
   }, [selectedUserId])
     
 
-    
-
-    // function to run for connection to socket
-  //   const websocketconnect = async() => {
-  //     if (selectedUserId) {
-  //       // socket connection made
-  //     const socket = io("http://localhost:3000");
-      
-  //     // emit request with acknowledgement for joining chat room successfully
-  //     try{
-  //       const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
-        
-        
-  //       if(room_response.status !=="ok")
-  //         {
-  //           console.log("Error on joining room");
-  //           alert("Error occured on joining room!");
-  //         }
-  //     }
-  //     catch(err)
-  //     {
-  //       console.error("Error occured during socket connection!");
-  //       alert("Error occured on joining room!");
-  //     }
-  //     }
-  //   }
-
-  //   // call function to establish socket connection
-  //   websocketconnect()
-  // },
-  // [selectedUserId])
-
-    
-
-      
-      // socket message
-      // socket.on('connect', () => {
-      //   socket.emit('start',msg)
-      //   // socket.emit('chat_message', newMessage);
-      // })
-      // socket.on('received', (received_msg) => {
-      //   console.log("from backend",received_msg);
-      // })
-
-
-      // SOCKET IO COMES INTO PLAY WHEN CHAT USER IS CLICKLED
-
-      // SOCKET CONNECTION MADE HERE ON CLICKING CHAT USER
-
-      // socket 
-      // initilise socket connectio
-      
-      
-
-      // SOCKET CODE 
-
-
-      // const ws = new WebSocket("ws://localhost:8080"); // Replace with your WebSocket server
-      // socketRef.current = ws;
-
-      // ws.onopen = () => {
-      //   console.log("WebSocket connected");
-      //   // Optionally notify server of the selected chat
-      //   ws.send(JSON.stringify({ type: "join", userId: selectedUserId }));
-      // };
-
-      // ws.onmessage = (event) => {
-      //   const message = JSON.parse(event.data);
-      //   handleWebSocketMessage(message);
-      // };
-
-      // ws.onclose = () => {
-      //   console.log("WebSocket disconnected");
-      // };
-
-      // ws.onerror = (err) => {
-      //   console.error("WebSocket error:", err);
-      // };
-
-      // return () => {
-      //   ws.close(); // Cleanup on unmount or user change
-      // };
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  
-  // Handler for incoming WebSocket messages
-  // Updates messages and users state with new message data
-  // const handleWebSocketMessage = (message) => {
-  //   if (message.type === "message") {
-  //     setMessages((prev) => [...prev, message.data]);
-  //     setUsers((prevUsers) =>
-  //       prevUsers.map((user) =>
-  //         user.id === selectedUserId
-  //           ? { ...user, messages: [...user.messages, message.data] }
-  //           : user
-  //       )
-  //     );
-  //   }
-  // };
-
   // Handler for sending new messages
   // Prevents empty messages, updates UI, and sends via WebSocket
   const handleSend = async (e) => {
@@ -376,48 +238,14 @@ useEffect(() => {
     console.log(newMessage);
 
     try {
-      // Immediately show user's message in UI
-
-      // dont set message by yourself in ui let web socket do it
-      // setMessages((prev) => [...prev, newMessage]);
-
-
-      // felt pointless
-      // setUsers((prevUsers) =>
-      //   prevUsers.map((user) =>
-      //     user.id === selectedUserId
-      //       ? { ...user, messages: [...user.messages, newMessage] }
-      //       : user
-      //   )
-      // );
-
-      // web socket connection made
-      // const socket = io("http://localhost:3000");
       
-      // emit request with acknowledgement for joining chat room
-      // try{
-      //   const room_response = await socket.timeout(5000).emitWithAck('chat-room',selectedUserId);
-      //   if(room_response.status !=="ok")
-      //     {
-      //       console.log("Error on joining room");
-      //       alert("Error occured on joining room!");
-      //     }
-      // }
-      // catch(err)
-      // {
-      //   console.error("Error occured during socket connection!");
-      //   alert("Error occured on joining room!");
-      // }
-      
-      
-
       // after successfull joining of chatroom
       if(socketRef.current)
       {
         socketRef.current.emit('chat-message', newMessage);
       }
       
-      // api call to backend to store the message just made
+      // API call to backend to store the message just made
       // send message to backend and send id of the chat user
       const token2 = await getToken();
       const chat_insert = await fetch("http://localhost:3000/api/chat-data/insert", {
@@ -428,48 +256,19 @@ useEffect(() => {
         },
         body: JSON.stringify({data: newMessage, id: selectedUserId})
       })
+
       // response after storing messsages
       const db_chat_insert = await chat_insert.json();
       console.log("response from db after inserting chats", db_chat_insert.message);
 
-      console.log("MRER LIEYEEEE",messages);
+      const current_Scroll = chatscroll.current;
+      setTimeout(()=> {
+        current_Scroll.scrollTop = current_Scroll.scrollHeight;
+      },200)
+      
 
       // resets the input field for new message
       setInput("");
-
-
-
-
-      // const socket = io("http://localhost:3000");
-
-      // // socket message
-      // socket.on('connect', () => {
-      //   socket.emit('chat_message', newMessage);
-      // })
-      // socket.on('received', (received_msg) => {
-      //   console.log("from backend",received_msg);
-      // })
-      
-
-
-
-
-
-      // Send message via actual WebSocket
-      // socketRef.current?.send(
-      //   JSON.stringify({
-      //     type: "message",
-      //     text: input,
-      //     to: selectedUserId,
-      //   })
-      // );
-
-      
-
-      // call to db to store the new message in db
-      //  sue this state selectedUserId // go to backend with this as params
-
-      // 
 
     } catch (error) {
       console.error("Error sending message:", error);
@@ -480,12 +279,15 @@ useEffect(() => {
   // Handler for selecting a user to chat with
   // Updates selected user and fetches their chat history                1
   const handleSelectUser = async (id) => {
+
     // ON CLICK USER CHAT USERID IS SET
     // this also opens up chat window with the chat user
+
     setSelectedUserId(id);   
 
     try {
       const messages = await fetchChatsByFriendIdAPI(id);
+
       // SETTING STATE for MESSAGES they are already existing they come from the db
       setMessages(messages); 
       console.log("MESSAGES that are set and canme from db",messages);
@@ -495,7 +297,7 @@ useEffect(() => {
   };
 
   // Handler for returning to friends list view
-  // Resets selected user and clears messages  // CORRECTION HANDLE BACK TO CHATS
+  // HANDLE BACK TO CHATS
   const handleBackToFriends = () => {
     // USER ID NULL when chat windows with user is closed
     setSelectedUserId(null); 
@@ -520,9 +322,9 @@ useEffect(() => {
   return (
     // Main container with responsive layout
     <div className="max-w-5xl mx-auto mt-10 bg-white shadow-md rounded-xl flex flex-col lg:flex-row h-[80vh] overflow-hidden">
-      {/* Friends list sidebar - visible only when no chat is selected */}
       {/* WHOLE DIV WILL BE HIDDEN IF CHAT WITH USER SELECTED*/}
-      {/* CORRECTION : ITS NOT FRIENLDIST BUT THE EXISTING CHATS OF USER GOT FROM THE DB*/}
+      {/* THE EXISTING CHATS OF USER GOT FROM THE DB*/}
+      
       <div className={`w-full bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900 text-white p-4 space-y-4 overflow-y-auto ${
         selectedUserId ? "hidden" : "block"
       }`}
@@ -562,7 +364,7 @@ useEffect(() => {
           </div>
 
           {/* Messages container with scroll */}
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 px-2">
+          <div ref={chatscroll} className="flex-1 overflow-y-auto space-y-4 mb-4 px-2">
             {messages.map((msg, idx) => (
               // to every message both divs apply their own styling
               <div

@@ -117,9 +117,12 @@ const Signup = () => {
     //basic regex for validation btw regex means regular expression so it is from the compiler design class
     const usernameRegex = /^[a-z0-9_]{5,20}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const fullNameRegex = /^(?=.{3,20}$)[A-Za-z]+(?: [A-Za-z]+)*$/;
     //these are errors thrown when we submit the form
 
     if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+    else if (!fullNameRegex.test(formData.fullName)) newErrors.fullName = "Fullname must be 3–20 letters, only spaces allowed.";
+    
     if (!usernameRegex.test(formData.username))
       newErrors.username =
         "Username must be 5–20 characters long, using only lowercase letters, numbers, or underscores";
@@ -251,6 +254,7 @@ const Signup = () => {
 
         await setActive({ session: result.createdSessionId });
         const token = await getToken();
+        console.log("signup token", token);
 
         // db calling
         console.log("SESSION TOKEN IN FRONTEND",token);

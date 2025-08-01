@@ -1,20 +1,38 @@
 import React, { useState } from "react";
 
 const options = [
-  "Completely Disagree",
+  "Fully Disagree",
+  "Partially Disagree",
   "Slightly Disagree",
   "Neutral",
   "Slightly Agree",
-  "Completely Agree",
+  "Partially Agree",
+  "Fully Agree",
 ];
 
+const backend_options = {
+  "Fully Disagree":-3,
+  "Partially Disagree":-2,
+  "Slightly Disagree":-1,
+  "Neutral":0,
+  "Slightly Agree":1,
+  "Partially Agree":2,
+  "Fully Agree":3,
+}
+
 const RangeSelector = ({ index, handleChange }) => {
-  const [value, setValue] = useState(2);
+  const [value, setValue] = useState(3);
 
   const handleSelect = (e) => {
     setValue(parseInt(e.target.value)); // Updated local UI state 
-    handleChange(index, e.target.value); // parent answer state updated
+    console.log("target value: ",e.target.value)
+    const key = options[e.target.value];
+    console.log("key :", key);
+    const value = backend_options[key];
+    console.log("value :",value);
+    handleChange(index, value); // parent answer state updated
   };
+
 
   return (
     <div className="w-full max-w-lg mx-auto p-6 bg-white rounded-2xl shadow-lg">
@@ -27,7 +45,7 @@ const RangeSelector = ({ index, handleChange }) => {
         <input
           type="range"
           min="0"
-          max="4"
+          max="6"
           value={value}
           onChange={handleSelect}
           className="w-full h-3 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-700 rounded-full appearance-none outline-none transition-all

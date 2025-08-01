@@ -1,12 +1,11 @@
-/*
+import React from "react";
 
-this is the main landing page that contains the first page which is shown when user comes to the site first time 
-it will have two buttons
+/*
+main landing page
+hastwo buttons
 get started - will navigate to the registration page
 login - will mavigate to the login page
  */
-
-import React from "react";
 
 // hook for navigation
 import { useNavigate } from "react-router-dom";
@@ -53,10 +52,6 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm z-10">
-        Made with ❤️ by Danish Najeeb
-      </div>
     </div>
   );
 };

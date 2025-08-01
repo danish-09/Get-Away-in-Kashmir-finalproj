@@ -25,7 +25,7 @@ const ForgotPassword = () => {
   const [repeatPassword, setRepeatPassword] = useState(""); // Confirm new password
 
 
-  //useeffect for issigned up
+  // useEffect for issigned up
 
   useEffect(() => {
     const after_reset_login = async() => {
@@ -46,19 +46,24 @@ const ForgotPassword = () => {
         });
         const backend_result = await response.json();
         console.log("result from BACKEND during reset password: ",backend_result);
+
+        // if error
         if(backend_result.error)
         {
           setMessage(`${backend_result.error}`)
           return;
         }
+
+        // success
         setMessage("Password reset successfull. Logging you in");
         setTimeout(() => {
-          // window.location is a browser API                                   
+          // navigates to home                                   
           navigate("/home")
         }, 2000);
         
       }
     }
+
     // calling function
     after_reset_login();
   },[isSignedIn])
@@ -84,23 +89,14 @@ const ForgotPassword = () => {
     setMessage("Sending OTP...");
 
     try {
-      //API CALL HERE
-      // Simulated API call to send OTP
-      // const response = await fetch('/api/auth/forgot-password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ email }),
-      // });
-      // const data = await response.json();
+      // API call to send OTP
 
-      // Clerk successful OTP send
-      // this will allow the render of other form 
       const res = await signIn.create({
         strategy: 'reset_password_email_code',
         identifier: email,
       });
+
+      // logging and setting
       console.log("Reset code sent to email", res);
       setOtpSent(true);
       setMessage("OTP has been sent to your email.");
@@ -132,20 +128,6 @@ const ForgotPassword = () => {
     }
 
     try {
-      //API CALL HERE
-      // Simulated API call to verify OTP and reset password
-      // const response = await fetch('/api/auth/reset-password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     email,
-      //     otp,
-      //     newPassword
-      //   }),
-      // });
-      // const data = await response.json();
 
       // Simulate successful password reset
       const res = await signIn.attemptFirstFactor({
@@ -155,25 +137,20 @@ const ForgotPassword = () => {
       });
       
       if (res.status === "complete" && isLoaded) {
+
+        // on success
         console.log("Password reset successfull!");
         console.log("after resetting session id is: ",res.createdSessionId);
 
         // sets the session
         await setActive({session:res.createdSessionId});
     
-        
 
-        
-        
-
-      } else {
+      } else { // on error
         console.log("Password reset unsuccessfull", res);
         setMessage("Password reset Unsuccessfully.");
       }
                               
-      // WHY NOT USE NAVIGATE HERE ALSO WITH REPLACE:TRUE For actions that shouldn't be reversible 
-      // callback function triggered after 2000ms 2secs 
-      
 
     } catch (error) {
       setMessage("Failed to reset password. Please try again.");
@@ -194,13 +171,13 @@ const ForgotPassword = () => {
           {otpSent ? "Reset Password" : "Forgot Password"}
         </h2>
 
-        {/* Conditional rendering of forms based on OTP status   if otp is not sent*/}
+        {/* Conditional rendering of forms based on OTP status if otp is not sent*/}
         {!otpSent ? (
           // Email submission form
           <form onSubmit={handleEmailSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="email" // htmlfor links the label to the input its bet practice , helps screen readers
+                htmlFor="email" // html for links the label to the input its best practice , helps screen readers
                 className="block mb-2 text-sm font-medium text-gray-700"
               >
                 Email Address
@@ -223,6 +200,7 @@ const ForgotPassword = () => {
             </button>
           </form>
         ) : (
+          
           // Password reset form with OTP verification
           <form onSubmit={handlePasswordReset} className="space-y-6">
             <div>

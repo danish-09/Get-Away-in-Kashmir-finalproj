@@ -24,8 +24,8 @@ const HomeLayout = () => {
   // Navigation configuration with paths, labels, and icons
   const navLinks = [
     { path: "/home", label: "Home", icon: <Home size={18} /> },
-    { path: "/add-post", label: "Add Post", icon: <PlusSquare size={18} /> },
-    { path: "/friends", label: "Friends", icon: <Users size={18} /> },
+    { path: "/add-post", label: "Add Trip", icon: <PlusSquare size={18} /> },
+    { path: "/friends", label: "Saved Profiles", icon: <Users size={18} /> },
     { path: "/chat", label: "Chat", icon: <MessageCircle size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
@@ -46,7 +46,7 @@ const HomeLayout = () => {
 
       {/* Sidebar navigation with gradient background */}
       <aside
-        className={`fixed md:static top-0 left-0 h-screen z-10 transform ${
+        className={`flex flex-col fixed md:static top-0 left-0 h-dvh z-10 transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 transition-transform duration-300 ease-in-out
     w-64 bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900 text-white shadow-lg p-6`}
@@ -75,7 +75,7 @@ const HomeLayout = () => {
       </aside>
 
       {/* Main content area - renders child routes */}
-      <main className="flex-1 bg-gray-200 p-4 md:p-6 md:ml-0">
+      <main className="flex-1 bg-gray-200 p-4 md:p-6 md:ml-0 h-screen">
         <Outlet />
       </main>
     </div>

@@ -7,7 +7,7 @@ import { useClerk } from "@clerk/clerk-react";
 // SettingsPage component - Handles user settings and profile management
 const SettingsPage = () => {
 
-  // logout clerk
+  // logout from clerk
 
   const { signOut } = useClerk();
 
@@ -59,8 +59,9 @@ const SettingsPage = () => {
   const onLogout = () => {
     localStorage.clear();
     signOut({
-      redirectUrl:"/"
+      redirectUrl:"/",
     })
+    sessionStorage.clear();
   };
 
   // Form submission handler for username update
@@ -104,9 +105,12 @@ const SettingsPage = () => {
       <h1 className="text-3xl font-semibold text-[#78350f] text-center">
         Settings
       </h1>
+      {/* <div className="">
 
-      {/* Username update form */}
-      <form onSubmit={handleUsernameUpdate} className="space-y-4">
+      
+
+      Username update form */}
+      {/* <form onSubmit={handleUsernameUpdate} className="space-y-4 mb-2">
         <h2 className="text-xl font-medium text-gray-800">Update Username</h2>
         <input
           type="text"
@@ -121,12 +125,12 @@ const SettingsPage = () => {
         >
           Update Username
         </button>
-      </form>
+      </form> */}
 
       {/* Password update form */}
-      <form
+      {/* <form
         onSubmit={handlePasswordUpdate}
-        className="space-y-4 pt-4 border-t border-gray-200"
+        className="space-y-4 pt-2 border-t border-gray-200 mb-2"
       >
         <h2 className="text-xl font-medium text-gray-800">Update Password</h2>
         <input
@@ -149,10 +153,10 @@ const SettingsPage = () => {
         >
           Update Password
         </button>
-      </form>
+      </form> */}
 
       {/* Personality test section */}
-      <div className="pt-6 border-t border-gray-200">
+      {/* <div className="pt-4 border-t border-gray-200 mb-2">
         <p className="text-gray-700 mb-2">
           {personalityTaken
             ? "Retake your personality test."
@@ -164,7 +168,7 @@ const SettingsPage = () => {
         >
           {personalityTaken ? "Retake" : "Take personality test"}
         </button>
-      </div>
+      </div> */}
 
       {/* Logout button */}
       <div className="pt-6 border-t border-gray-200 text-center">
@@ -175,7 +179,8 @@ const SettingsPage = () => {
           Logout
         </button>
       </div>
-    </div>
+      </div>
+    // </div>
   );
 };
 

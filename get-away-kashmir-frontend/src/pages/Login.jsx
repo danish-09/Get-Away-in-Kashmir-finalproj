@@ -11,8 +11,8 @@ const Login = () => {
   // clerk
   const { isLoaded, signIn, setActive } = useSignIn();
 
+  // useAuth from clerk
   const { isLoaded: isAuthLoaded, isSignedIn, userId, sessionId, getToken,signOut } = useAuth()
-  
 
   // Hook for programmatic navigation
   const navigate = useNavigate();
@@ -50,6 +50,7 @@ const Login = () => {
 
     try {
 
+      // if already signed in, signout first
       if(isSignedIn)
       {
         alert("Already signed in, signing out");
@@ -63,7 +64,7 @@ const Login = () => {
         password,
       });
 
-      
+      // success from clerk
       if(response.status==="complete" && isLoaded)
       {
         await setActive({ session: response.createdSessionId });
@@ -71,78 +72,51 @@ const Login = () => {
 
         console.log("SESSION TOKEN IN LOGIN",token);
 
-        // db calling
+        // Api Call to backend
         const result = await fetch("http://localhost:3000/api/signin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}` // jwt session token
           },
-          // for backend coverts to json.stringify which json not js obejct (object notation) from js object
         });
         
-        //RESULT FROM BACKEND
+        // RESULT FROM BACKEND
         const backend_result = await result.json();
+
+        // if error
         if(backend_result.error)
         {
           alert(backend_result.error);
           console.log("Backend says error occured during login");
+          return;
         }
+        // success
         else
         {
           console.log("result from BACKEND during login: ",backend_result);
         }
-        
-        
         
         // goes to home screen
         navigate("/home");
         // spinner stops
         setLoading(false);
       }
-      else {
+      else { // clerk flags issues
         console.log("clerk status says missing fields!");
         alert("missing fields!");
       }
-      
-      // if (response.status === "complete") {
-      //   await setActive({ session: response.createdSessionId }); // set session
-      // };
-      //   const result = await fetch("/api/login", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${response.createdSessionId}`, // optional: secure communication
-      //   },
-      //   body: JSON.stringify({ identifier, password }), // Send credentials to server
-      //  });
-      //  const backend_result = await result.json();
-      //  if (backend_result.success) {
-      //   // Store user data in localStorage for persistent session
-      //   localStorage.setItem("token", backend_result.token);
-      //   localStorage.setItem("username", backend_result.username);
-      //   localStorage.setItem("userid", backend_result.id);
-      //   if (backend_result.user.personality) {
-      //     localStorage.setItem("personality", backend_result.user.personality);
-      //   }
-      //   localStorage.setItem("isAuthenticated", true);
-      //   navigate("/home"); // Redirect to home page after successful login
-      // }
-      // else {
-      //   // Display error message if login fails
-      //   alert(backend_result.message || "Invalid credentials");
-      // }
-      
-      
 
     } catch (err) {
-      // Handle any network or server errors
+      // on errors
       setLoading(false);
       console.error("Login error:", err);
       alert(err.message);
       
     }
   };
+
+  // if loading show animation
   if(loading)
   {
     return <FullPageSpinner/>
@@ -212,33 +186,7 @@ const Login = () => {
             Login
           </button>
         </form>
-        {/* Divider */}
-        {/* <div className="text-center text-gray-500 mt-4">or</div> */}
-        {/* Google Sign-in button */}
-
-        {/* <SignInButton redirectUrl="/home">
-        <button type="button" className="w-full border border-gray-300 py-2 my-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition">
-          <img
-          src="https://www.svgrepo.com/show/475656/google-color.svg"
-          alt="Google"
-          className="w-5 h-5"
-          />
-          Sign in with Google
-          </button>
-        </SignInButton>*/}
-
-        {/* <button
-          type="button"
-          onClick={() => {}}                                     // MISSING HREF TO THE LINK ALSO DEF OF HREF
-          className="w-full border border-gray-300 py-2 my-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition"
-        >
-          <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google"
-            className="w-5 h-5"
-          />
-          Sign in with Google
-        </button> */}
+        
         
         {/* Sign up link for new users */}
         <p className="mt-6 text-center text-sm text-gray-600">
