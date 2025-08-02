@@ -14,7 +14,8 @@ function normalizeUserPair(userA, userB) {
 export const chat_user_insert = async (req, res)=>{
     try{
     const visitor_id = req.params.id;
-    // db query from personality
+
+    // db query for visitor details
     const result = await db.query(
         `SELECT username, personality from post_visits where id=$1`,
         [visitor_id]);
@@ -23,22 +24,30 @@ export const chat_user_insert = async (req, res)=>{
     const receiver_personality = receiver_details.personality; 
 
 
+    // current user details from clerk
     const current_userId = req.auth.userId; 
     const user = await clerkClient.users.getUser(current_userId);
-    const current_username = user.username; 
+    const current_username = user.username;
+    
+    // personality of current user
     const personality_res = await db.query(
         `SELECT personality from personality where user_id=$1`,
         [current_userId]);
-    const current_personality = personality_res.rows[0] || "";
+
+    // log
+    // console.log("personlaity res:::::", personality_res);
+
+    const current_personality = personality_res.rows[0].personality || "";
+
+    // log
+    // console.log("right now user personality", current_personality);
 
     const { user1, user2, normalized_pair } = normalizeUserPair(current_username, receiver_username);
 
-
     // insert to chat widnow of user
-
-    // doesnt allow duplicates due to using normalized pair 
+    // doesn't allow duplicates due to using normalized pair 
     // if other user aka reciver tries to tries to insert in the sense
-    // user2 user1 in chat record normalize fucntion will reorder it
+    // user2 user1 in chat record normalize function will reorder it
     // as defined in query on conflict nothing happens so the chat record
     // is not inserted since only 1 record will exist betweeen 2 users
 
@@ -50,23 +59,19 @@ export const chat_user_insert = async (req, res)=>{
     
     if(!insert_result.rowCount===0)
     {
+        // chat record added
         console.log("inserted into db chat record",insert_result.rows[0]);
         const chat_record_id = insert_result.rows[0].id;
         console.log("chat record is",chat_record_id);
     }
     
 
-
-    
-    // insert into chat messages , keep message empty but do insert
-    // await db.query(`INSERT INTO chat_messages (chat_id,)
-    //     VALUES ($1); `, [chat_record_id]);
-
     // everything goes well
     return res.status(200).json({ message: "Chat user created successfully!!" });
     }
     catch(err)
     {
+        //  on error
         console.error("Error during adding chat user", err);
     }
 }
@@ -76,13 +81,17 @@ export const chat_user_insert = async (req, res)=>{
 export const chat_user_get = async (req, res)=>{
 
     try{
+    
+    // current user details
     const current_userId = req.auth.userId; 
     const user = await clerkClient.users.getUser(current_userId);
     const current_username = user.username;
 
+
     // check if chat users exist for the logged in user
     const chat_exists = await db.query(`SELECT * from chat_record WHERE sender_username = $1 OR receiver_username = $1`, [current_username]);
     
+    // if some chat exists
     if(chat_exists.rowCount > 0)
     {
         const result = await db.query(`SELECT 
@@ -102,9 +111,12 @@ export const chat_user_get = async (req, res)=>{
             WHERE cr.sender_username = $1 OR cr.receiver_username = $1
             ORDER BY cr.id DESC, cm.id;`, [current_username])
         
+        // log
         // console.log("the result for the chat window of user", result.rows);
         const rows = result.rows;
-        console.log("this is from db after sort", rows);
+        
+        // log
+        // console.log("this is from db after sort", rows);
 
         // intialise userobject map function maintains insertion order
         const usermap = new Map();
@@ -140,10 +152,16 @@ export const chat_user_get = async (req, res)=>{
             }
         }
         const chatUserList = Array.from(usermap.values())
-        console.log("CHat users to be sent to backend", chatUserList);
+
+        // log
+        // console.log("Chat users to be sent to backend", chatUserList);
 
         // everything goes well
         return res.status(200).json({ message: "Chat users fetch successfull!", data: chatUserList });
+    }
+    else
+    {
+        return res.status(200).json({ message: "No Chats exist"});
     }
 
     }
@@ -153,24 +171,28 @@ export const chat_user_get = async (req, res)=>{
     }    
 }
 
+
 // INSERT CHAT DATA
 export const chat_data_insert = async (req, res)=>{
     try{
-    console.log("ROUTE HIT CHAT DATA WALA")
+    
+    // log
+    // console.log("ROUTE HIT CHAT DATA")
     const response =  req.body;
-    console.log(response);
     const chat_data = response.data;
-    //for message object
+
+    // for message object
     const sender_username = chat_data.sender;
     const sender_text = chat_data.text;
+
     // chat_id in chat_messages table comes from chat_record primary key i.e., id
     const chat_id = response.id;
     
-   
-    console.log("CHAT data from frontend", chat_data);
-    console.log("CHAT id from chat_records coming from frontend", chat_id);
-    // this is the just sent message directly
-    // so lets insert it into the chat records
+    // log
+    // console.log("CHAT data from frontend", chat_data);
+    // console.log("CHAT id from chat_records coming from frontend", chat_id);
+
+    // insert chat message it into the chat records
     // insert into chat messages table
     await db.query(`INSERT INTO chat_messages (chat_id, sender_username, content) values ($1, $2, $3)` , [chat_id, sender_username, sender_text]);
 
@@ -180,6 +202,7 @@ export const chat_data_insert = async (req, res)=>{
     }
     catch(err)
     {
+        // on error
         console.error("error during inserting message",err);
         return res.status(500).json({message:"Backend says error during inserting message"});
     }

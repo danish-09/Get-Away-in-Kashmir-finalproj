@@ -22,8 +22,10 @@ function isValidDOB(req, res, next) {
         return res.status(400).json({ error: "User must be at least 18 years old." });
     }
 
-    // If valid, continue to the next middleware or route handler
+    // log
     console.log("age in middleware:",age);
+    
+    // continue to the next middleware or route handler
     next();
 }
 

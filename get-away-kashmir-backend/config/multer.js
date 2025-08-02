@@ -1,6 +1,6 @@
 import multer from "multer"
 
-// multer setup
+// multer setup for image uploads
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){

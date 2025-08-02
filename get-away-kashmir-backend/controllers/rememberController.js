@@ -9,66 +9,87 @@ function normalizeUserPair(userA, userB) {
   return { user1, user2, normalized_pair };
 }
 
-// INSERT AS REMEMBERED USER
+// insert as saved profile 
 export const remember_user_insert = async (req, res)=>{
     try{
+    
+    // frontend request comes with visitor id from visitors list
     const id = req.params.id;
-    console.log("id fro frrongted ", id);
 
-    // get data from db
+    // log
+    // console.log("id from frontend ", id);
+
+    // db query to retrieve profile details of the to be saved profile
     const result1 = await db.query(`SELECT username, personality, user_id FROM post_visits
         where id=$1`, [id]);
+
     const db_res = result1.rows[0];
 
+    // profile details of the to be saved profile
     const rem_username = db_res.username;
     const rem_personality = db_res.personality;
     const rem_userid = db_res.user_id;
 
-    console.log(rem_username);
-    console.log(rem_personality);
-    console.log(rem_userid);
+    // log
+    // console.log(rem_username);
+    // console.log(rem_personality);
+    // console.log(rem_userid);
 
-    
-
+    // current user id
     const current_userId = req.auth.userId;
-    console.log(current_userId);
+    
+    // log
+    // console.log(current_userId);
 
-
-    // validation
+    // db query to validate if the to be saved profile is already saved
 
     const result = await db.query(`SELECT * FROM remembered_users
         where remembering_user_id=$1 and remembered_user_id=$2`, 
         [current_userId, rem_userid]);
     
+    // if profile not already saved
     if(result.rowCount === 0)
     {
         // insert data into db only if no such record already exists
         const result2 = await db.query(`INSERT INTO remembered_users (remembering_user_id, remembered_user_id, remembered_username, remembered_personality)
         VALUES ($1, $2, $3, $4) RETURNING *`, [current_userId, rem_userid, rem_username, rem_personality]);
-        const insert_res = result2.rows[0];
         
-        console.log(insert_res);
+        const insert_res = result2.rows[0];
 
-        // sucess
-        return res.status(200).json({message:"User added to your saved profiles"});
+        // log
+        // console.log(insert_res);
+
+        // success
+        return res.status(200).json({user_added_message:"Profile added to your saved profiles"});
+    }
+    
+    // if profile already saved
+    else
+    {
+        return res.status(200).json({message:"Profile already saved!"});
     }
 }
 catch(err)
 {
+    // on error
     console.log(err);
-    return res.status(500).json({error:"yes", message:"Server error while adding remembered user"})
+    // error for user
+    return res.status(500).json({error:"yes", message:"Server error while saving profile"})
 }
 }
 
 
 
-// get the remembered users
+// get the saved profiles
 export const remembered_user_get = async (req, res)=>{
     try{
 
-    console.log("rpute hit remember user get!!");
+    // log
+    // console.log("route hit remember user get!!");
+
     const current_userId = req.auth.userId;
-    console.log(current_userId);
+    // log
+    // console.log(current_userId);
     
     const users = await db.query(`SELECT id, remembered_username, remembered_personality 
         FROM remembered_users where remembering_user_id=$1`, [current_userId]);
@@ -81,62 +102,77 @@ export const remembered_user_get = async (req, res)=>{
 
     catch(err)
     {
+        // error
         console.log(err);
-        return res.status(500).json({error:"yes", message:"Server error while fetching remembered users"})
+        // error for user
+        return res.status(500).json({error:"yes", message:"Server error while fetching saved profiles"})
     }
 
 }
 
 
 
-// INSERT CHAT USER FROM FRIENDS
+// initiate chat with profiles from saved profiles section
 export const remembered_user_chat = async (req, res)=>{
     try{
-    console.log("aremeber chat user hit success");
-    const saved_id = req.params.id;
-    console.log("id from frontend come sas", saved_id);
+    
+    // log
+    // console.log("remember chat user hit success");
 
-    // db query from personality
+    // saved profile id (from frontend request)
+    const saved_id = req.params.id;
+
+    // log
+    // console.log("id from frontend ", saved_id);
+
+    // db query to get the saved profile from remembered users table
     const result = await db.query(
         `SELECT remembered_username, remembered_personality from remembered_users where id=$1`,
         [saved_id]);
     
+    // profile details
     const receiver_details = result.rows[0];
     const receiver_username = receiver_details.remembered_username;
     const receiver_personality = receiver_details.remembered_personality; 
 
 
+    // current user details
     const current_userId = req.auth.userId; 
     const user = await clerkClient.users.getUser(current_userId);
     const current_username = user.username; 
     const personality_res = await db.query(
         `SELECT personality from personality where user_id=$1`,
         [current_userId]);
-    const current_personality = personality_res.rows[0] || "";
+    
+    // log
+    // console.log("personality of current logged in user", personality_res);
+
+    const current_personality = personality_res.rows[0].personality || "";
 
     const { user1, user2, normalized_pair } = normalizeUserPair(current_username, receiver_username);
 
 
-    // insert to chat widnow of user
-
+    // insert chat record between the two users
     // doesnt allow duplicates due to using normalized pair 
     // if other user aka reciver tries to tries to insert in the sense
-    // user2 user1 in chat record normalize fucntion will reorder it
+    // user2 user1 in chat record normalize function will reorder it
     // as defined in query on conflict nothing happens so the chat record
     // is not inserted since only 1 record will exist betweeen 2 users
 
     // insert into chat record
-    // doesnt do anything if record between two already exists
+    // doesn't do anything if record between two already exists
     const insert_result = await db.query(`INSERT INTO chat_record (sender_username, sender_personality, receiver_username, receiver_personality, user1, user2)
         VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (normalized_pair) DO NOTHING RETURNING *; `, [current_username, current_personality , receiver_username, receiver_personality, user1, user2]);
     
-    
+    // if new chat record inserted
     if(insert_result.rowCount !== 0)
     {
-        console.log("inserted into db chat record",insert_result.rows[0]);
+        // log
+        // console.log("inserted into db chat record",insert_result.rows[0]);
         const chat_record_id = insert_result.rows[0].id;
-        console.log("chat record is",chat_record_id);
+
+        // console.log("chat record is",chat_record_id);
     }
     
 
@@ -146,6 +182,7 @@ export const remembered_user_chat = async (req, res)=>{
     }
     catch(err)
     {
+        // on error
         console.error("Error during adding chat user", err);
     }
 }
