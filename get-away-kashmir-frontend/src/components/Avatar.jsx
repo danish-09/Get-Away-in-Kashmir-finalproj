@@ -3,6 +3,7 @@ import { lorelei } from "@dicebear/collection";
 import { useMemo } from "react";
 
 const Avatar = ({ username, personality }) => {
+
   // Combine username and personality into a consistent seed
   const seed = `${username}-${personality}`.toLowerCase().trim();
 
@@ -12,7 +13,7 @@ const Avatar = ({ username, personality }) => {
   const AvatarSvg = useMemo(() => {
     const avatar = createAvatar(lorelei, {
       seed: seed,
-      // you can add style options here
+      
     });
     return avatar.toString();
   }, [seed]);

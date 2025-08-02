@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+// options for slider
+
 const options = [
   "Fully Disagree",
   "Partially Disagree",
@@ -9,6 +11,8 @@ const options = [
   "Partially Agree",
   "Fully Agree",
 ];
+
+// encode options
 
 const backend_options = {
   "Fully Disagree":-3,
@@ -20,6 +24,7 @@ const backend_options = {
   "Fully Agree":3,
 }
 
+// function handling selected slider value
 const RangeSelector = ({ index, handleChange }) => {
   const [value, setValue] = useState(3);
 
@@ -66,12 +71,13 @@ const RangeSelector = ({ index, handleChange }) => {
           [&::-moz-range-thumb]:border-gray-400
           [&::-moz-range-thumb]:shadow-md"
         />
+
         {/* Labels */}
         <div className="flex justify-between mt-4 text-xs font-medium text-gray-600">
           {options.map((option, idx) => (
             <span
               key={idx}
-              className={`w-1/5 text-center transition-colors duration-200 ${ //value will be same to idx since ist being updated in state contnuosly
+              className={`w-1/5 text-center transition-colors duration-200 ${ // value will be same to idx since its being updated in state continuosly
                 idx === value ? "text-[#d97706] font-semibold" : ""
               }`}
             >

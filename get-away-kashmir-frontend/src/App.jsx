@@ -1,17 +1,14 @@
 /*
    
-  Starting point of the application where all the logic of the rounting take place 
-  
-
+  Starting point of the application where all the logic of the rounting takes place 
   for every page a route is defined and for that route which page will be rendered
-
   the page folder will contain every page
  */
 
-//for navigation
+// for navigation
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-//import pages
+// import pages
 import LandingPage from "./pages/landingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
