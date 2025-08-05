@@ -134,7 +134,7 @@ useEffect(() => {
     
     // chat users received from backend
     const chat_users = db_users_response.data;
-    console.log("chat users ::::::", chat_users);
+    console.log("chat users ::", chat_users);
     return chat_users;
 
   };
@@ -201,7 +201,7 @@ useEffect(() => {
         catch(err)
         {
           console.error("Error occured during socket connection!");
-          alert("Error occured on joining room!");
+          alert("Error occured on during socket connection!");
         }
       }
 
@@ -211,7 +211,9 @@ useEffect(() => {
       // on receiving a message from the chat room i.e from chat partner
       socketRef.current.on('received', (message) => {        
         console.log("received from backend", message);
-        // this includes our own messages 
+
+        // this includes our own messages
+        // shows received message immediately in chat
         setMessages((prev) => [...prev, message])
 
       })
@@ -261,6 +263,8 @@ useEffect(() => {
       const db_chat_insert = await chat_insert.json();
       console.log("response from db after inserting chats", db_chat_insert.message);
 
+
+      // for scroll
       const current_Scroll = chatscroll.current;
       setTimeout(()=> {
         current_Scroll.scrollTop = current_Scroll.scrollHeight;
