@@ -1,4 +1,4 @@
-// middleware to deal with unauthenticated requests
+// middleware to deal with unauthenticated requests used to verify authorization of every incoming request
 import { getAuth, requireAuth, clerkClient} from '@clerk/express'
 
 async function isAuthenticated(req, res, next) {
@@ -8,6 +8,8 @@ async function isAuthenticated(req, res, next) {
     {
         // log 
         console.log("problem occured in authentication of request!")
+        
+        // error to user
         return res.status(400).json({ error: "Backend says not authorized for access" });
     }
 

@@ -1,6 +1,7 @@
 import pg from "pg"
 import dotenv from "dotenv"
 
+// for env variables
 dotenv.config()
 
 
@@ -14,6 +15,8 @@ const db = new pg.Client({
     port:  process.env.PG_PORT,
   });
 
+// connects to the db
 db.connect();
 
+// db client object
 export default db;

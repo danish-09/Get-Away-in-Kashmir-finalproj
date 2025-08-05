@@ -1,4 +1,3 @@
-
 // middleware for post details validation
 
 function postValidate(req, res, next) {
@@ -6,8 +5,11 @@ function postValidate(req, res, next) {
     const data = req.body;
 
     const user_date = data["visitDate"];
+
+    // convert to date object
     const selectedDate = new Date(user_date);
     const today = new Date();
+
 
     // Remove time part from both dates for an accurate comparison
     selectedDate.setHours(0, 0, 0, 0);
@@ -18,6 +20,7 @@ function postValidate(req, res, next) {
         {
             // on error
             console.log("Missing details for add post");
+
             // error for user
             return res.status(500).json({ error: "Backend says, please provide all details!"});
         }
@@ -27,6 +30,7 @@ function postValidate(req, res, next) {
     {
         // on error
         console.log("Invalid date selection for add post");
+        
         // error for user
         return res.status(500).json({ error: "Backend says, please input valid date!"});
     }

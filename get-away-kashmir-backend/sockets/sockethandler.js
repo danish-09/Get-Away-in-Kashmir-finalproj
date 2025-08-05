@@ -36,14 +36,14 @@ async function handleSocketEvent (socket, io) {
         s_name = chat_record.sender_username;
         r_name = chat_record.receiver_username;
 
-        // invoke function to create chat room
+        // invoke function to create unique chat room between 2 users
         chatroom = create_chat_room(s_name, r_name);
 
-        // log
-        // console.log(`${s_name} has joined chatroom: ${chatroom}`);
-
-        // user joins the chat romm
+        // user joins the chat room
         socket.join(chatroom)
+
+        // log
+        // console.log(`a user has joined chatroom: ${chatroom}`);
 
         // execute callback on success
         callback({
@@ -69,14 +69,14 @@ async function handleSocketEvent (socket, io) {
         io.to(chatroom).emit('received', message)
 
         // log
-        // console.log(`message sent from ${s_name} to the ${r_name} is`, message);
+        // console.log(`a user has sent message`, message);
 
     })
 
     // on socket disconnect
     socket.on('disconnect', () => {
         // log
-        console.log(`user has disconnected , id `, socket.id)
+        // console.log(`user has disconnected , id `, socket.id)
     })
 
 }

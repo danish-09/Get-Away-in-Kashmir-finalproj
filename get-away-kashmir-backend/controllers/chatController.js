@@ -53,16 +53,20 @@ export const chat_user_insert = async (req, res)=>{
 
     // insert into chat record
     // doesnt do anything if record between two already exists
+    // db table computes normalized pair itself based on values of user1 and user2
     const insert_result = await db.query(`INSERT INTO chat_record (sender_username, sender_personality, receiver_username, receiver_personality, user1, user2)
         VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (normalized_pair) DO NOTHING RETURNING *; `, [current_username, current_personality , receiver_username, receiver_personality, user1, user2]);
     
     if(!insert_result.rowCount===0)
     {
-        // chat record added
-        console.log("inserted into db chat record",insert_result.rows[0]);
+        // chat record add
+
+        //log
+        // console.log("inserted into db chat record",insert_result.rows[0]);
+
         const chat_record_id = insert_result.rows[0].id;
-        console.log("chat record is",chat_record_id);
+        // console.log("chat record is",chat_record_id);
     }
     
 
@@ -107,18 +111,20 @@ export const chat_user_get = async (req, res)=>{
             cm.sender_username,
             cm.content
             FROM chat_record cr
+            
             LEFT JOIN chat_messages cm ON cr.id = cm.chat_id
             WHERE cr.sender_username = $1 OR cr.receiver_username = $1
             ORDER BY cr.id DESC, cm.id;`, [current_username])
         
         // log
         // console.log("the result for the chat window of user", result.rows);
+
         const rows = result.rows;
         
         // log
         // console.log("this is from db after sort", rows);
 
-        // intialise userobject map function maintains insertion order
+        // intialise map object , maintains insertion order
         const usermap = new Map();
 
         for (const row of rows) {
@@ -144,14 +150,18 @@ export const chat_user_get = async (req, res)=>{
 
             // append messages to userobject only if some chat exists in record
             if(row.sender_username && row.content)
-            {
+            {   
                 usermap.get(chat_id).messages.push({
                     sender: sender_username,
                     text: content,
                 })
             }
         }
+
         const chatUserList = Array.from(usermap.values())
+
+        // log
+        // console.log("chatuser list:", chatUserList);
 
         // log
         // console.log("Chat users to be sent to backend", chatUserList);
@@ -178,6 +188,7 @@ export const chat_data_insert = async (req, res)=>{
     
     // log
     // console.log("ROUTE HIT CHAT DATA")
+
     const response =  req.body;
     const chat_data = response.data;
 

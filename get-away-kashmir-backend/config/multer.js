@@ -1,7 +1,9 @@
 import multer from "multer"
 
-// multer setup for image uploads
+// multer : package providing a file upload middleware
+//  setup for image uploads
 
+// define storage configuration
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
         cb(null,'temp/uploads')
@@ -14,6 +16,7 @@ const storage = multer.diskStorage({
     }
 })
 
+// multer() returns a middleware function
 const upload = multer({storage: storage})
 
 export default upload;

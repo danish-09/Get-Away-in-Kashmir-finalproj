@@ -1,4 +1,3 @@
-
 import db from "../config/db.js";
 import { getAuth, requireAuth, clerkClient} from '@clerk/express'
 
@@ -61,7 +60,7 @@ export const user_personality = async (req, res)=>{
     // answers to personality questionnaire (from frontend request)
     const rawAnswers = req.body.data;
 
-    // transform the raw answers into th form expected by ML Api
+    // transform the raw answers into the form expected by ML Api
 
     const answerArray = Object.keys(rawAnswers)
     .sort((a, b) => Number(a) - Number(b))       // Sort keys numerically
@@ -70,7 +69,8 @@ export const user_personality = async (req, res)=>{
     // log
     // console.log("answer array for sending to ML Api:", answerArray);
 
-    // send answers to machine learning server
+    // API Call to send answers to machine learning server
+
     const personality_result = await fetch("http://localhost:5000/predict", {
         method: "POST",
         headers: {

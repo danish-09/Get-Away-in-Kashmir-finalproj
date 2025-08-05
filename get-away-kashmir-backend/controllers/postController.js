@@ -1,8 +1,7 @@
 import db from "../config/db.js";
 import { getAuth, requireAuth, clerkClient} from '@clerk/express'
 
-// ADD POST
-
+// ADD POST/TRIP
 
 export const post_add = async (req, res)=>{
     try{
@@ -34,7 +33,7 @@ export const post_add = async (req, res)=>{
       ); 
 
     // add user if user doesnt already exist in post_users
-    if(result_post_user.rowCount===0)
+    if(result_post_user.rowCount === 0)
     {
         // db query to add user
         const result_insert_user = await db.query(
@@ -106,8 +105,7 @@ export const post_add = async (req, res)=>{
             // log
             // console.log("Path", img_path);
 
-            // using above post id to store image in table
-            // storing the image path only
+            // using above post id to store image path in table
 
             const result_insert_image = await db.query(
                 `INSERT INTO post_images (post_id, image_url)
@@ -144,7 +142,7 @@ export const post_add = async (req, res)=>{
     
 }
 
-// get the posts
+// GET THE POSTS/TRIPS
 
 export const post_get = async (req, res)=>{
     try{
@@ -159,7 +157,7 @@ export const post_get = async (req, res)=>{
         post_details.id as post_id,
         post_details.title,
         post_details.location,
-        TO_CHAR(post_details.visit_date,'YYYY-MM-DD') AS visit_date,
+        TO_CHAR(post_details.visit_date,'DD-MM-YYYY') AS visit_date,
         post_details.description,
         post_users.username,
         post_users.personality,
@@ -175,9 +173,9 @@ export const post_get = async (req, res)=>{
       );
     
     const result = db_posts.rows;
-
+    
     // log
-    // console.log("result from the dattabase tables combined is", result);
+    // console.log("result from the database tables combined is", result);
     // console.log("no of rows",db_posts.rowCount);
 
     // everything goes well
@@ -194,7 +192,7 @@ export const post_get = async (req, res)=>{
 }
 
 
-// GET DETAILS OF POST
+// GET DETAILS OF POST (VISITOR DETAILS FOR POST)
 
 export const post_visit = async (req, res)=>{
     try{
@@ -246,8 +244,6 @@ export const post_visit = async (req, res)=>{
     // query doesnt allow the current user to see his own profile in visitor list
     // since he would not want to see himself and since its of no use to him
 
-    // logic on frontend we show delete option only on posts that have been
-    // created by the current logged in user
 
     // db query to get visitors but excludes the logged in user
     const visitors_response = await db.query(
@@ -278,40 +274,57 @@ export const post_visit = async (req, res)=>{
 
 
 // DELETE POST
+// delete option in frontend is only shown for posts made by logged-in user (still validate on backend)
 
 export const post_delete = async (req, res)=>{
     try{
     
-    // log
-    // console.log("post delte route hit");
-    // console.log("post delte route hit", req.params.id);
-
     // id of post which is to be deleted (comes from frontend request)
     const post_id = req.params.id;
 
-     
-    // delete option in frontend is only shown for posts made by logged-in user
-    // post will be deleted only if it belongs to the current logged in user
-    // so that any user cannot delete post of others
+    // current user id
+    const current_User_Id = req.auth.userId;
 
-    // db query to delete post
-    const del_res = await db.query("DELETE FROM post_details WHERE id = $1",
-        [post_id]);
-    
+    // db query to fetch post_user_id for post which is being requested to delete
+    const verify_user = await db.query("select post_user_id from post_details where id=$1", [post_id]);
+    const res_verify_user = verify_user.rows[0].post_user_id;
+
     // log
-    // console.log(del_res.rowCount);
+    // console.log("to be deleted post user id is", res_verify_user);
 
-    // if post deleted
-    if(del_res.rowCount === 1)
+    // db query to fetch clerk user_id for the above fetched post_user_id
+    const find_user = await db.query("select user_id from post_users where id=$1", [res_verify_user]);
+    const res_find_user = find_user.rows[0].user_id;
+
+    // log
+    // console.log("clerk user id for user who posted the trip", res_find_user);
+
+    // if current user id and user id for user who made the post match
+    // then delete post
+    if (res_find_user === current_User_Id)
     {
-        // deleted
-        return res.status(200).json({message: "Post deleted successfully"})
+        // log
+        // console.log("identity of user verified");
+        
+        // db query to delete post
+        
+        const del_res = await db.query("DELETE FROM post_details WHERE id = $1",[post_id]);
+
+        // log
+        // console.log(del_res.rowCount);
+
+        if(del_res.rowCount === 1)
+            {
+                // deleted
+                return res.status(200).json({message: "Post deleted successfully"})
+            }
+        else
+            {
+                // not deleted
+                return res.status(400).json({error: "Post deletion unsuccessfull"})
+            }
     }
-    else
-    {
-        // not deleted
-        return res.status(200).json({error: "Post deletion unsuccessfull"})   
-    }
+    
 }
 catch(err)
 {

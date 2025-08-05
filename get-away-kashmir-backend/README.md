@@ -24,5 +24,3 @@ This is the backend of **Get-Away-in-Kashmir**, a web-based travel platform that
 
 ---
 
-## 🗃️ Folder Structure
-

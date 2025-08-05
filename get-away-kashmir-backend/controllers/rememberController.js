@@ -1,7 +1,7 @@
-
 import db from "../config/db.js";
 import { getAuth, requireAuth, clerkClient} from '@clerk/express'
 
+// helper function
 function normalizeUserPair(userA, userB) {
     // alphabetical order sort
   const [user1, user2] = [userA, userB].sort(); 
@@ -9,7 +9,8 @@ function normalizeUserPair(userA, userB) {
   return { user1, user2, normalized_pair };
 }
 
-// insert as saved profile 
+// insert as saved profile
+
 export const remember_user_insert = async (req, res)=>{
     try{
     
@@ -79,15 +80,17 @@ catch(err)
 }
 
 
-
 // get the saved profiles
+
 export const remembered_user_get = async (req, res)=>{
     try{
 
     // log
     // console.log("route hit remember user get!!");
 
+    // current user id
     const current_userId = req.auth.userId;
+
     // log
     // console.log(current_userId);
     
@@ -111,8 +114,8 @@ export const remembered_user_get = async (req, res)=>{
 }
 
 
-
 // initiate chat with profiles from saved profiles section
+
 export const remembered_user_chat = async (req, res)=>{
     try{
     
