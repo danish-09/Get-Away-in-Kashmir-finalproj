@@ -22,7 +22,7 @@ function postValidate(req, res, next) {
             console.log("Missing details for add post");
 
             // error for user
-            return res.status(500).json({ error: "Backend says, please provide all details!"});
+            return res.status(400).json({ error: "Backend says, please provide all details!"});
         }
     
     // if earlier date selected
@@ -32,7 +32,7 @@ function postValidate(req, res, next) {
         console.log("Invalid date selection for add post");
         
         // error for user
-        return res.status(500).json({ error: "Backend says, please input valid date!"});
+        return res.status(400).json({ error: "Backend says, please input valid date!"});
     }
 
     // continue to the next middleware or route handler

@@ -51,6 +51,17 @@ const LandingPage = () => {
           </button>
         </div>
       </div>
+      {/* Footer */}
+      <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm z-10">
+        <a 
+    href="https://www.16personalities.com/personality-types" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="underline hover:text-gray-300 transition"
+  >
+    Read more on personalities here
+  </a>
+      </div>
 
     </div>
   );

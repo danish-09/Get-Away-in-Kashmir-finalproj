@@ -7,10 +7,7 @@ export const user_signup = async (req, res)=>{
     try{
     
     // checks authorization header
-    const token = req.headers.authorization?.split(" ")[1];
-
-    // Check if token is present and valid
-    // console.log("Received token:", token); 
+    // const token = req.headers.authorization?.split(" ")[1];
     
     // current user id
     const current_User_Id = req.auth.userId;

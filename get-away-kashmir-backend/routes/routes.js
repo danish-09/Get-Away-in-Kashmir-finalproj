@@ -28,7 +28,7 @@ router.post("/personality", isAuthenticated, user_personality)
 router.post("/signin", isAuthenticated, user_signin)
 
 // add post
-// multer for milited image uploads
+// multer for limited image uploads
 // with postValidate middleware to validate the post details
 router.post("/add-post", isAuthenticated, upload.fields([{ name: 'images', maxCount: 3 }]) , postValidate, post_add )
 

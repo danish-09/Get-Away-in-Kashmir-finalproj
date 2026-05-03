@@ -63,7 +63,7 @@ const Signup = () => {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    return age >= 18;
+    return age >= 25;
   };
   
 
@@ -94,7 +94,7 @@ const Signup = () => {
       newErrors.dob = "Date of birth is required";
     }
     else if(!isValidAge(formData.dob)){
-      newErrors.dob = "Invalid! User must be atleast 18 years old";
+      newErrors.dob = "Invalid! User must be atleast 25 years old";
     }
     
     if (!formData.gender) newErrors.gender = "Gender is required";
